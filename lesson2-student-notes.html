@@ -98,16 +98,27 @@
   .box.right { border-color: var(--good); background: var(--good-soft); }
   .box.wrong { border-color: var(--bad); background: var(--bad-soft); }
 
-  textarea.work {
-    width: 100%;
-    min-height: 90px;
-    font: 16px/1.5 ui-monospace, Menlo, Consolas, monospace;
-    padding: 8px 10px;
-    border: 1px dashed #9aa6bd;
-    border-radius: 8px;
-    resize: vertical;
-    background: #fbfcfe;
-    color: var(--ink);
+  /* ---------- whiteboard ---------- */
+  .board { border: 2px solid #9aa6bd; border-radius: 10px; overflow: hidden; background: #fff; }
+  .board .tools {
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    padding: 6px 8px; background: #eef1f7; border-bottom: 1px solid var(--line);
+  }
+  .board .tools button {
+    font-size: .9rem; padding: 6px 12px; border-radius: 8px;
+    background: #fff; color: var(--ink); border: 2px solid var(--line); font-weight: 600;
+  }
+  .board .tools button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .board .tools .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-right: 4px; }
+  .board .tools .spacer { flex: 1; }
+  .board canvas {
+    display: block; width: 100%; aspect-ratio: 4 / 3;
+    touch-action: none; cursor: crosshair;
+    background-color: #fff;
+    background-image:
+      linear-gradient(#e9edf5 1px, transparent 1px),
+      linear-gradient(90deg, #e9edf5 1px, transparent 1px);
+    background-size: 24px 24px;
   }
 
   table.options { width: 100%; border-collapse: collapse; }
@@ -181,7 +192,7 @@
 <div class="howto">
   <strong>How to use this page:</strong>
   <ol>
-    <li>Work each problem on paper or in the gray “scratch work” space.</li>
+    <li>Work each problem on paper or on the <strong>scratch board</strong>. Draw on it with your finger, a stylus, or a mouse. (To scroll the page, swipe outside the board.)</li>
     <li>Type your answers in the boxes. Fractions like <span class="math">5/2</span> and decimals like <span class="math">2.5</span> both work.</li>
     <li>Press <span class="pill check">Check my work</span> to see what's right (green) and what needs another try (red).</li>
     <li>Stuck? Press <span class="pill help">I need help</span>. Each press shows one more hint.</li>
@@ -300,8 +311,8 @@
     </select>
   </div>
   <div class="row">
-    <span class="label">Scratch work <span class="hint-text">(not graded)</span></span>
-    <textarea class="work" aria-label="scratch work"></textarea>
+    <span class="label">Scratch board <span class="hint-text">(draw with your finger, stylus, or mouse — not graded)</span></span>
+    <div class="board"></div>
   </div>
   <div class="buttons">
     <button class="check" type="button">Check my work</button>
@@ -348,8 +359,8 @@
     </select>
   </div>
   <div class="row">
-    <span class="label">Scratch work <span class="hint-text">(not graded)</span></span>
-    <textarea class="work" aria-label="scratch work"></textarea>
+    <span class="label">Scratch board <span class="hint-text">(draw with your finger, stylus, or mouse — not graded)</span></span>
+    <div class="board"></div>
   </div>
   <div class="buttons">
     <button class="check" type="button">Check my work</button>
@@ -396,8 +407,8 @@
     </select>
   </div>
   <div class="row">
-    <span class="label">Scratch work <span class="hint-text">(not graded)</span></span>
-    <textarea class="work" aria-label="scratch work"></textarea>
+    <span class="label">Scratch board <span class="hint-text">(draw with your finger, stylus, or mouse — not graded)</span></span>
+    <div class="board"></div>
   </div>
   <div class="buttons">
     <button class="check" type="button">Check my work</button>
@@ -440,8 +451,8 @@
     </select>
   </div>
   <div class="row">
-    <span class="label">Scratch work <span class="hint-text">(not graded)</span></span>
-    <textarea class="work" aria-label="scratch work"></textarea>
+    <span class="label">Scratch board <span class="hint-text">(draw with your finger, stylus, or mouse — not graded)</span></span>
+    <div class="board"></div>
   </div>
   <div class="buttons">
     <button class="check" type="button">Check my work</button>
@@ -487,8 +498,8 @@
     <div class="line">Kristin bought <input class="box" data-type="num" data-answer="2" aria-label="fancy shirts"> fancy shirts and <input class="box" data-type="num" data-answer="5" aria-label="plain shirts"> plain shirts.</div>
   </div>
   <div class="row">
-    <span class="label">Scratch work <span class="hint-text">(not graded)</span></span>
-    <textarea class="work" aria-label="scratch work"></textarea>
+    <span class="label">Scratch board <span class="hint-text">(draw with your finger, stylus, or mouse — not graded)</span></span>
+    <div class="board"></div>
   </div>
   <div class="buttons">
     <button class="check" type="button">Check my work</button>
@@ -608,11 +619,10 @@
       var evt = b.tagName === "SELECT" ? "change" : "input";
       b.addEventListener(evt, function () { b.classList.remove("right", "wrong"); save(); });
     });
-    sec.querySelectorAll("textarea.work").forEach(function (t) { t.addEventListener("input", save); });
   });
 
   // ---------- save answers in this browser ----------
-  var allFields = Array.prototype.slice.call(document.querySelectorAll(".box, textarea.work"));
+  var allFields = Array.prototype.slice.call(document.querySelectorAll(".box"));
 
   function save() {
     try {
@@ -626,9 +636,115 @@
     } catch (e) {}
   }
   document.getElementById("resetAll").addEventListener("click", function () {
-    if (!confirm("Clear all your answers on this page?")) return;
-    try { localStorage.removeItem(STORE_KEY); } catch (e) {}
+    if (!confirm("Clear all your answers and drawings on this page?")) return;
+    try {
+      localStorage.removeItem(STORE_KEY);
+      document.querySelectorAll(".board").forEach(function (b, i) { localStorage.removeItem(STORE_KEY + "-board-" + i); });
+    } catch (e) {}
     location.reload();
+  });
+
+  // ---------- scratch whiteboards (finger / stylus / mouse) ----------
+  var W = 1200, H = 900;               // drawing size; it is stretched to fit the screen
+  var COLORS = [["Black", "#1f2937"], ["Blue", "#2f5bd3"], ["Red", "#c62828"]];
+
+  document.querySelectorAll(".board").forEach(function (board, idx) {
+    var key = STORE_KEY + "-board-" + idx;
+    var tools = document.createElement("div");
+    tools.className = "tools";
+    var canvas = document.createElement("canvas");
+    canvas.width = W; canvas.height = H;
+    canvas.setAttribute("aria-label", "scratch whiteboard");
+    board.appendChild(tools);
+    board.appendChild(canvas);
+    var ctx = canvas.getContext("2d");
+    ctx.lineCap = "round"; ctx.lineJoin = "round";
+
+    var color = COLORS[0][1], erasing = false;
+    var undo = [];
+    var penButtons = [];
+
+    function makeBtn(html, onClick) {
+      var b = document.createElement("button");
+      b.type = "button"; b.innerHTML = html;
+      b.addEventListener("click", onClick);
+      tools.appendChild(b);
+      return b;
+    }
+    function selectTool(btn) {
+      penButtons.forEach(function (b) { b.classList.remove("on"); });
+      btn.classList.add("on");
+    }
+    COLORS.forEach(function (c, i) {
+      var b = makeBtn('<span class="dot" style="background:' + c[1] + '"></span>' + c[0], function () {
+        color = c[1]; erasing = false; selectTool(b);
+      });
+      penButtons.push(b);
+      if (i === 0) b.classList.add("on");
+    });
+    var eraserBtn = makeBtn("Eraser", function () { erasing = true; selectTool(eraserBtn); });
+    penButtons.push(eraserBtn);
+    var sp = document.createElement("span"); sp.className = "spacer"; tools.appendChild(sp);
+    makeBtn("↶ Undo", function () {
+      if (!undo.length) return;
+      ctx.putImageData(undo.pop(), 0, 0);
+      store();
+    });
+    makeBtn("Clear", function () {
+      pushUndo();
+      ctx.clearRect(0, 0, W, H);
+      store();
+    });
+
+    function pushUndo() {
+      undo.push(ctx.getImageData(0, 0, W, H));
+      if (undo.length > 25) undo.shift();
+    }
+    function store() {
+      try { localStorage.setItem(key, canvas.toDataURL("image/png")); } catch (e) {}
+    }
+    try {
+      var saved = localStorage.getItem(key);
+      if (saved) { var img = new Image(); img.onload = function () { ctx.drawImage(img, 0, 0); }; img.src = saved; }
+    } catch (e) {}
+
+    function pos(e) {
+      var r = canvas.getBoundingClientRect();
+      return { x: (e.clientX - r.left) * W / r.width, y: (e.clientY - r.top) * H / r.height };
+    }
+    var drawing = false, last = null, activeId = null;
+
+    canvas.addEventListener("pointerdown", function (e) {
+      if (drawing) return;               // ignore a second finger
+      drawing = true; activeId = e.pointerId;
+      canvas.setPointerCapture(e.pointerId);
+      pushUndo();
+      last = pos(e);
+      ctx.globalCompositeOperation = erasing ? "destination-out" : "source-over";
+      ctx.strokeStyle = color;
+      ctx.lineWidth = erasing ? 50 : 6;
+      ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(last.x + 0.1, last.y + 0.1); ctx.stroke();
+      e.preventDefault();
+    });
+    canvas.addEventListener("pointermove", function (e) {
+      if (!drawing || e.pointerId !== activeId) return;
+      var evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+      if (!evs.length) evs = [e];
+      evs.forEach(function (ev) {
+        var p = pos(ev);
+        ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+        last = p;
+      });
+      e.preventDefault();
+    });
+    function end(e) {
+      if (!drawing || e.pointerId !== activeId) return;
+      drawing = false; activeId = null;
+      ctx.globalCompositeOperation = "source-over";
+      store();
+    }
+    canvas.addEventListener("pointerup", end);
+    canvas.addEventListener("pointercancel", end);
   });
 
   load();
