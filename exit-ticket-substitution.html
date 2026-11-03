@@ -744,7 +744,7 @@ const ready=(async function connect(){
   if(!window.claude||!window.claude.use) return;
   try{ [db,userCap,downloadsCap]=await Promise.all([window.claude.use("db"),window.claude.use("user"),window.claude.use("downloads")]); }catch(e){ db=null; }
   if(userCap){ try{ isTeacher=(await userCap.canEdit())||(await userCap.isOwner()); }catch(e){} }
-  if(isTeacher) $("teacherBtn").hidden=false;
+  if(isTeacher){ $("teacherBtn").hidden=false; if(location.hash==="#teacher") openTeacher(); }
   if(!db||!userCap) return;
   try{ uid=await userCap.id(); }catch(e){ uid=null; }
   if(!uid) return;
