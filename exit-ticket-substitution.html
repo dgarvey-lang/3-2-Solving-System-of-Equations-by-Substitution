@@ -61,6 +61,17 @@ button{cursor:pointer}
 .status.ok{color:var(--good);font-weight:700}
 .status.err{color:var(--bad);font-weight:700}
 .pad-open{display:none}
+.answer input:disabled{opacity:1;color:var(--ink);border-style:dashed}
+.result{border-color:var(--accent)}
+.score-line{display:flex;align-items:center;gap:16px}
+.score-big{font-family:var(--f-display);font-weight:800;font-size:2.6rem;line-height:1;font-variant-numeric:tabular-nums}
+.result-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:6px}
+.result-list li{display:flex;gap:8px;align-items:baseline;flex-wrap:wrap}
+.gc{display:flex;flex-direction:column;gap:8px;border-top:1px solid var(--line);padding-top:12px}
+.gc ol{margin:0;padding-left:1.2em;display:flex;flex-direction:column;gap:4px}
+#reportPreview{width:100%;border:1px solid var(--line);border-radius:8px}
+.pad.locked .tools{display:none}
+.pad.locked canvas{cursor:default}
 
 /* Scratch pad */
 .pad{position:sticky;top:0;height:100vh;height:100dvh;display:flex;flex-direction:column;border-left:1px solid var(--line);background:var(--surface);min-width:0}
@@ -127,13 +138,10 @@ tr:last-child td{border-bottom:0}
   <section class="work" id="work">
     <div class="card" id="startCard">
       <h2>Before you start</h2>
-      <p class="hint">Type your name and pick the version number your teacher gave you.</p>
+      <p class="hint">Type your first and last name. You'll get your own version of the problems.</p>
       <div class="row">
         <label class="field" style="flex:1 1 200px">Your name
           <input id="nameInput" autocomplete="name" placeholder="First and last name">
-        </label>
-        <label class="field">Version
-          <select id="verSelect"></select>
         </label>
       </div>
       <div class="row">
@@ -166,12 +174,40 @@ tr:last-child td{border-bottom:0}
           <button class="btn small pad-open" data-q="q2">✏️ Scratch pad</button>
         </div>
       </div>
-      <div class="card">
-        <div class="row">
+      <div class="card" id="submitCard">
+        <div class="row" id="submitRow">
           <button class="btn primary" id="submitBtn">Turn in</button>
           <span class="status" id="saveMsg"></span>
         </div>
-        <p class="hint">Your work saves as you go. You can still fix answers after you turn in.</p>
+        <div class="confirm" id="confirmRow" hidden>
+          <span id="confirmText">Turn in now? You can't change your answers after this.</span>
+          <button class="btn primary small" id="confirmYes">Yes, turn in</button>
+          <button class="btn small" id="confirmNo">Keep working</button>
+        </div>
+        <p class="hint">Your work saves as you go. Once you turn in, you'll see your score.</p>
+      </div>
+      <div class="card result" id="resultCard" hidden>
+        <div class="score-line">
+          <span class="score-big" id="scoreBig"></span>
+          <div>
+            <h2>Your score</h2>
+            <p class="hint" id="scoreSub"></p>
+          </div>
+        </div>
+        <ul class="result-list" id="resultList"></ul>
+        <div class="gc">
+          <h2>Turn it in on Google Classroom</h2>
+          <ol class="hint">
+            <li>Tap <b>Save picture</b>. A picture of your score and your work is saved to your device.</li>
+            <li>In Google Classroom, open the exit ticket assignment, choose <b>Add or create</b> → <b>File</b>, and pick the picture.</li>
+            <li>Tap <b>Turn in</b>.</li>
+          </ol>
+          <div class="row">
+            <button class="btn primary" id="saveImgBtn">Save picture</button>
+            <span class="status" id="imgMsg"></span>
+          </div>
+          <img id="reportPreview" alt="Picture of your score and work" hidden>
+        </div>
       </div>
     </div>
   </section>
@@ -212,7 +248,7 @@ tr:last-child td{border-bottom:0}
       <div class="summary" id="tSummary"></div>
       <p class="status" id="tStatus"></p>
       <div class="tbl-wrap"><table>
-        <thead><tr><th>Student</th><th>Version</th><th>Q1</th><th>Q2</th><th>Status</th><th>Last saved</th></tr></thead>
+        <thead><tr><th>Student</th><th>Version</th><th>Score</th><th>Q1</th><th>Q2</th><th>Status</th><th>Last saved</th></tr></thead>
         <tbody id="tRows"></tbody>
       </table></div>
       <div id="tDetail" style="margin-top:16px"></div>
@@ -264,11 +300,9 @@ function lsSet(o){try{localStorage.setItem(LS_KEY,JSON.stringify(o))}catch(e){}}
 // ---------- State ----------
 const $=id=>document.getElementById(id);
 const state={name:"",version:0,answers:{q1x:"",q1y:"",q2x:"",q2y:""},pads:{q1:{h:0,strokes:[]},q2:{h:0,strokes:[]}},submitted:false,submittedAt:null};
-let db=null, userCap=null, uid=null, docRef=null, isTeacher=false;
+let db=null, userCap=null, uid=null, docRef=null, isTeacher=false, downloadsCap=null;
 let current="q1";
-
-const verSelect=$("verSelect");
-verSelect.innerHTML='<option value="">Pick…</option>'+VERSIONS.map((_,i)=>`<option value="${i+1}">${i+1}</option>`).join("");
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
 
 function showTicket(){
   $("startCard").hidden=true;
@@ -279,19 +313,41 @@ function showTicket(){
   $("q1Sys").innerHTML=sysHTML(state.version,"q1").map(s=>"<div>"+s+"</div>").join("");
   $("q2Sys").innerHTML=sysHTML(state.version,"q2").map(s=>"<div>"+s+"</div>").join("");
   for(const k of ["q1x","q1y","q2x","q2y"]) $(k).value=state.answers[k]||"";
-  updateSubmitLabel();
+  applyLock();
   selectQ(current);
 }
-function updateSubmitLabel(){
-  $("submitBtn").textContent=state.submitted?"Update my answers":"Turn in";
+
+// Hands out versions 1, 2, 3 … 15, 1, 2 … in the order students start, using a shared counter.
+// Without the shared store (e.g. GitHub Pages) it falls back to a random version.
+async function assignVersion(){
+  if(db&&uid){
+    const ref=db.doc("meta/assign");
+    for(let i=0;i<15;i++){
+      try{
+        const lease=await ref.acquire({holder:uid,ttlMs:4000});
+        if(lease.acquired){
+          const snap=await ref.get();
+          const n=(snap.exists&&Number(snap.data().next))||0;
+          await ref.set({next:n+1});
+          return (n%VERSIONS.length)+1;
+        }
+      }catch(e){ break; }
+      await sleep(250+Math.random()*500);
+    }
+  }
+  return 1+Math.floor(Math.random()*VERSIONS.length);
 }
 
-$("startBtn").addEventListener("click",()=>{
+$("startBtn").addEventListener("click",async()=>{
   const name=$("nameInput").value.trim();
-  const v=parseInt(verSelect.value,10);
-  if(!name){$("startMsg").textContent="Type your name first.";$("startMsg").className="status err";return}
-  if(!v){$("startMsg").textContent="Pick your version number.";$("startMsg").className="status err";return}
-  state.name=name.slice(0,60); state.version=v;
+  const msg=$("startMsg");
+  if(!name){msg.textContent="Type your name first.";msg.className="status err";return}
+  $("startBtn").disabled=true; msg.className="status"; msg.textContent="Getting your problems…";
+  await ready;
+  if(state.version){ showTicket(); return; } // already started on this account
+  state.name=name.slice(0,60);
+  state.version=await assignVersion();
+  $("startBtn").disabled=false; msg.textContent="";
   showTicket(); persist(true);
 });
 
@@ -303,13 +359,122 @@ document.querySelectorAll(".q").forEach(c=>c.addEventListener("pointerdown",()=>
 document.querySelectorAll(".pad-open").forEach(b=>b.addEventListener("click",()=>{selectQ(b.dataset.q);$("pad").classList.add("open");resizeCanvas()}));
 $("closePad").addEventListener("click",()=>$("pad").classList.remove("open"));
 
-$("submitBtn").addEventListener("click",async()=>{
+$("submitBtn").addEventListener("click",()=>{
+  const a=state.answers, blanks=["q1x","q1y","q2x","q2y"].filter(k=>!String(a[k]||"").trim()).length;
+  $("confirmText").textContent=(blanks?"You have "+blanks+" blank answer"+(blanks>1?"s":"")+". ":"")+"Turn in now? You can't change your answers after this.";
+  $("submitRow").hidden=true; $("confirmRow").hidden=false;
+});
+$("confirmNo").addEventListener("click",()=>{$("submitRow").hidden=false;$("confirmRow").hidden=true});
+$("confirmYes").addEventListener("click",async()=>{
   state.submitted=true; state.submittedAt=new Date().toISOString();
-  updateSubmitLabel();
+  applyLock();
   const ok=await persist(true);
-  const msg=$("saveMsg");
-  if(db&&docRef){ msg.textContent=ok?"Turned in. Your teacher can see your work.":"Couldn't reach the server. Your work is saved on this device; try again in a moment."; msg.className="status "+(ok?"ok":"err"); }
-  else { msg.textContent="Saved on this device. Show your teacher this screen."; msg.className="status ok"; }
+  const msg=$("imgMsg");
+  if(db&&docRef&&!ok){ msg.textContent="Your teacher's copy didn't save yet. Stay on this page and check your internet."; msg.className="status err"; }
+});
+
+// ---------- Score + lock ----------
+function scoreOf(doc){
+  const v=VERSIONS[(doc.version||1)-1], a=doc.answers||{}; let pts=0;
+  for(const q of ["q1","q2"]){ if(parseAns(a[q+"x"])===v[q].x) pts++; if(parseAns(a[q+"y"])===v[q].y) pts++; }
+  return {pts,max:4};
+}
+function applyLock(){
+  const locked=state.submitted;
+  for(const k of ["q1x","q1y","q2x","q2y"]) $(k).disabled=locked;
+  $("pad").classList.toggle("locked",locked);
+  $("submitCard").hidden=locked; $("resultCard").hidden=!locked;
+  if(!locked) return;
+  const s=scoreOf(state);
+  $("scoreBig").textContent=s.pts+" / "+s.max;
+  $("scoreSub").textContent=Math.round(100*s.pts/s.max)+"% · Turned in "+fmtTime(state.submittedAt);
+  const list=$("resultList"); list.textContent="";
+  for(const q of ["q1","q2"]){
+    const g=grade(state,q), sol=VERSIONS[state.version-1][q], a=state.answers;
+    const li=document.createElement("li");
+    const t=document.createElement("b"); t.textContent="Question "+q[1]+":"; li.appendChild(t);
+    const yours=document.createElement("span"); yours.className="m"; yours.textContent="("+(a[q+"x"]||"?")+", "+(a[q+"y"]||"?")+")"; li.appendChild(yours);
+    li.appendChild(pillEl(g.cls==="good"?g:{cls:g.cls==="muted"?"muted":"bad",label:g.cls==="muted"?"Blank":"Not quite"}));
+    if(g.cls!=="good"){const k=document.createElement("span");k.className="m";k.style.color="var(--muted)";k.innerHTML="Correct answer: "+pairHTML(sol.x,sol.y);li.appendChild(k)}
+    list.appendChild(li);
+  }
+}
+
+// ---------- Picture for Google Classroom ----------
+function mathRuns(html){ // "<i>y</i> = 2<i>x</i>" -> [{t:"y",i:true},{t:" = 2",i:false},…]
+  return html.split(/(<i>.*?<\/i>)/).filter(Boolean).map(s=>s.startsWith("<i>")?{t:s.slice(3,-4),i:true}:{t:s,i:false});
+}
+function drawMath(c,html,x,y,size){
+  for(const r of mathRuns(html)){ c.font=(r.i?"italic ":"")+"500 "+size+"px 'STIX Two Text', 'Times New Roman', serif"; c.fillText(r.t,x,y); x+=c.measureText(r.t).width; }
+}
+function padImage(pad,maxW,maxH){
+  const strokes=(pad&&pad.strokes)||[]; if(!strokes.length) return null;
+  let x0=1e9,y0=1e9,x1=-1e9,y1=-1e9;
+  for(const s of strokes){ if(s.e) continue; for(let i=0;i<s.p.length;i+=2){x0=Math.min(x0,s.p[i]);x1=Math.max(x1,s.p[i]);y0=Math.min(y0,s.p[i+1]);y1=Math.max(y1,s.p[i+1]);} }
+  if(x1<x0) return null;
+  const m=30; x0-=m;y0-=m;x1+=m;y1+=m;
+  const k=Math.min(maxW/(x1-x0),maxH/(y1-y0),1.4);
+  const cv=document.createElement("canvas"); cv.width=Math.ceil((x1-x0)*k); cv.height=Math.ceil((y1-y0)*k);
+  const c=cv.getContext("2d"); c.translate(-x0*k,-y0*k); drawStrokes(c,strokes,k);
+  return cv;
+}
+async function buildReport(){
+  try{ await Promise.all(["800 40px 'Bricolage Grotesque'","700 20px 'Atkinson Hyperlegible'","400 20px 'Atkinson Hyperlegible'","500 26px 'STIX Two Text'","italic 500 26px 'STIX Two Text'"].map(f=>document.fonts.load(f))); }catch(e){}
+  const W=1200, P=48, inner=W-2*P, s=scoreOf(state), v=VERSIONS[state.version-1];
+  const pads={q1:padImage(state.pads.q1,inner-40,620),q2:padImage(state.pads.q2,inner-40,620)};
+  const secH=q=>290+(pads[q]?pads[q].height:30);
+  const H=210+secH("q1")+secH("q2")+70;
+  const cv=document.createElement("canvas"); cv.width=W; cv.height=H;
+  const c=cv.getContext("2d"), BODY="'Atkinson Hyperlegible', Arial, sans-serif", DISP="'Bricolage Grotesque', Arial, sans-serif";
+  c.fillStyle="#ffffff"; c.fillRect(0,0,W,H);
+  c.fillStyle="#18232f"; c.fillRect(0,0,W,170);
+  c.fillStyle="#ffffff"; c.font="800 34px "+DISP; c.fillText("Exit Ticket · Solving Systems by Substitution",P,62);
+  c.font="700 24px "+BODY; c.fillText(state.name,P,106);
+  c.font="400 20px "+BODY; c.fillStyle="#c9d3de"; c.fillText("Version "+state.version+" · Turned in "+fmtTime(state.submittedAt),P,140);
+  c.textAlign="right"; c.fillStyle="#f3c43a"; c.font="800 64px "+DISP; c.fillText(s.pts+" / "+s.max,W-P,100);
+  c.font="700 22px "+BODY; c.fillStyle="#ffffff"; c.fillText(Math.round(100*s.pts/s.max)+"%",W-P,140); c.textAlign="left";
+  let y=210;
+  for(const q of ["q1","q2"]){
+    const g=grade(state,q), ok=g.cls==="good", a=state.answers, sol=v[q];
+    c.fillStyle="#18232f"; c.font="800 28px "+DISP; c.fillText("Question "+q[1],P,y+10);
+    c.font="700 22px "+BODY; c.fillStyle=ok?"#1b7f4b":"#b4332b"; c.fillText(ok?"✓ Correct":(g.cls==="muted"?"Blank":"✗ Not quite"),P+170,y+10);
+    c.fillStyle="#fbf3d9"; c.fillRect(P,y+30,inner,92); c.fillStyle="#f3c43a"; c.fillRect(P,y+30,5,92);
+    c.fillStyle="#18232f"; const sys=sysHTML(state.version,q); drawMath(c,sys[0],P+24,y+68,28); drawMath(c,sys[1],P+24,y+106,28);
+    c.font="400 22px "+BODY; c.fillStyle="#18232f";
+    c.fillText("My answer:  x = "+(a[q+"x"]||"?")+",  y = "+(a[q+"y"]||"?"),P,y+160);
+    if(!ok){ c.fillStyle="#5a6876"; c.fillText("Correct answer:  ("+num(sol.x)+", "+num(sol.y)+")",P+520,y+160); }
+    c.fillStyle="#5a6876"; c.font="700 16px "+BODY; c.fillText("MY WORK",P,y+200);
+    const top=y+215, img=pads[q], boxH=img?img.height+20:50;
+    c.fillStyle="#fdfefe"; c.fillRect(P,top,inner,boxH);
+    c.strokeStyle="rgba(31,86,201,.10)"; c.lineWidth=1;
+    for(let gx=P;gx<=P+inner;gx+=20){c.beginPath();c.moveTo(gx+.5,top);c.lineTo(gx+.5,top+boxH);c.stroke()}
+    for(let gy=top;gy<=top+boxH;gy+=20){c.beginPath();c.moveTo(P,gy+.5);c.lineTo(P+inner,gy+.5);c.stroke()}
+    c.strokeStyle="#d3dbe4"; c.strokeRect(P+.5,top+.5,inner,boxH);
+    if(img) c.drawImage(img,P+20,top+10);
+    else { c.fillStyle="#5a6876"; c.font="italic 400 20px "+BODY; c.fillText("No scratch work",P+20,top+32); }
+    y+=secH(q);
+  }
+  c.fillStyle="#5a6876"; c.font="400 16px "+BODY; c.fillText("Graded automatically when turned in.",P,H-30);
+  return cv;
+}
+let reportURL=null;
+$("saveImgBtn").addEventListener("click",async()=>{
+  const msg=$("imgMsg"); msg.className="status"; msg.textContent="Making your picture…";
+  const cv=await buildReport();
+  const blob=await new Promise(r=>cv.toBlob(r,"image/png"));
+  if(reportURL) URL.revokeObjectURL(reportURL);
+  reportURL=URL.createObjectURL(blob);
+  const img=$("reportPreview"); img.src=reportURL; img.hidden=false;
+  const filename=(state.name.replace(/[^\w\- ]+/g,"").trim()||"Student")+" - Substitution Exit Ticket.png";
+  if(downloadsCap){
+    try{ await downloadsCap.save({filename,data:blob}); msg.textContent="Saved. Now upload it to Google Classroom."; msg.className="status ok"; }
+    catch(e){ msg.textContent=e&&e.code==="declined"?"Not saved. Tap Save picture to try again.":"Saving isn't available here. Take a screenshot of the picture below instead."; msg.className="status err"; }
+  }else if(window.claude&&window.claude.use){
+    msg.textContent="Saving isn't available here. Take a screenshot of the picture below instead."; msg.className="status err";
+  }else{
+    const a=document.createElement("a"); a.href=reportURL; a.download=filename; document.body.appendChild(a); a.click(); a.remove();
+    msg.textContent="Saved to your Downloads. Now upload it to Google Classroom."; msg.className="status ok";
+  }
 });
 
 // ---------- Saving ----------
@@ -387,7 +552,7 @@ function redraw(){
 function toLogical(e){const r=canvas.getBoundingClientRect();const k=1000/r.width;return [Math.round((e.clientX-r.left)*k),Math.round((e.clientY-r.top)*k)]}
 let live=null, livePointer=null;
 canvas.addEventListener("pointerdown",e=>{
-  if(!state.version){return}
+  if(!state.version||state.submitted) return;
   if(live) return;
   e.preventDefault(); canvas.setPointerCapture(e.pointerId); livePointer=e.pointerId;
   const [x,y]=toLogical(e);
@@ -427,7 +592,7 @@ $("eraserBtn").addEventListener("click",()=>{
   if(tool.erase) document.querySelectorAll(".swatch").forEach(s=>s.setAttribute("aria-pressed","false"));
   else document.querySelector(`.swatch[data-color="${tool.color}"]`).setAttribute("aria-pressed","true");
 });
-$("undoBtn").addEventListener("click",()=>{state.pads[current].strokes.pop();redraw();persist()});
+$("undoBtn").addEventListener("click",()=>{if(state.submitted)return;state.pads[current].strokes.pop();redraw();persist()});
 let clearArmed=null;
 $("clearBtn").addEventListener("click",()=>{
   const b=$("clearBtn");
@@ -474,14 +639,16 @@ function renderTeacher(){
     const tr=document.createElement("tr"); tr.className="click"; tr.tabIndex=0;
     const td=t=>{const c=document.createElement("td"); if(t instanceof Node) c.appendChild(t); else c.textContent=t; tr.appendChild(c); return c};
     const nm=document.createElement("b"); nm.textContent=d.name||"(no name)"; td(nm);
-    td(String(d.version||"—")); td(pillEl(g1)); td(pillEl(g2));
+    td(String(d.version||"—"));
+    const sc=scoreOf(d); const scB=document.createElement("b"); scB.textContent=sc.pts+" / "+sc.max+"  ("+Math.round(100*sc.pts/sc.max)+"%)"; td(scB);
+    td(pillEl(g1)); td(pillEl(g2));
     td(pillEl(d.submitted?{cls:"good",label:"Turned in"}:{cls:"muted",label:"Working"}));
     td(fmtTime(d.updatedAt));
     const open=()=>{tSelected=id;renderDetail()};
     tr.addEventListener("click",open); tr.addEventListener("keydown",e=>{if(e.key==="Enter")open()});
     rows.appendChild(tr);
   }
-  if(!docs.length){const tr=document.createElement("tr");const c=document.createElement("td");c.colSpan=6;c.className="empty";c.textContent="No student work yet. Rows appear here as soon as students start.";tr.appendChild(c);rows.appendChild(tr)}
+  if(!docs.length){const tr=document.createElement("tr");const c=document.createElement("td");c.colSpan=7;c.className="empty";c.textContent="No student work yet. Rows appear here as soon as students start.";tr.appendChild(c);rows.appendChild(tr)}
   $("tSummary").innerHTML="";
   const add=(label,val)=>{const s=document.createElement("span");s.innerHTML=label+": ";const b=document.createElement("b");b.textContent=val;s.appendChild(b);$("tSummary").appendChild(s)};
   add("Students",docs.length); add("Turned in",turned); add("Q1 correct",q1c+" / "+docs.length); add("Q2 correct",q2c+" / "+docs.length);
@@ -504,7 +671,7 @@ function renderDetail(){
   const item=tDocs.find(t=>t.id===tSelected); if(!item){tSelected=null;return}
   const d=item.d, v=VERSIONS[(d.version||1)-1];
   const head=document.createElement("div"); head.className="t-head";
-  const h=document.createElement("h2"); h.style.fontSize="1.15rem"; h.textContent=(d.name||"(no name)")+" · Version "+d.version; head.appendChild(h);
+  const h=document.createElement("h2"); h.style.fontSize="1.15rem"; const dsc=scoreOf(d); h.textContent=(d.name||"(no name)")+" · Version "+d.version+" · Score "+dsc.pts+" / "+dsc.max+" ("+Math.round(100*dsc.pts/dsc.max)+"%)"; head.appendChild(h);
   const sp=document.createElement("span"); sp.style.flex="1"; head.appendChild(sp);
   const conf=document.createElement("div"); conf.className="confirm";
   const del=document.createElement("button"); del.className="btn small"; del.textContent="Reset this student";
@@ -565,9 +732,17 @@ function restore(o){
 }
 if(restore(lsGet())) showTicket(); else selectQ("q1");
 
-(async function connect(){
+function resetToStart(){
+  state.name="";state.version=0;state.answers={q1x:"",q1y:"",q2x:"",q2y:""};
+  state.pads={q1:{h:0,strokes:[]},q2:{h:0,strokes:[]}};state.submitted=false;state.submittedAt=null;
+  lsSet(null);
+  $("ticket").hidden=true;$("startCard").hidden=false;$("verChip").hidden=true;
+  $("pad").classList.remove("locked"); selectQ("q1");
+}
+
+const ready=(async function connect(){
   if(!window.claude||!window.claude.use) return;
-  try{ [db,userCap]=await Promise.all([window.claude.use("db"),window.claude.use("user")]); }catch(e){ db=null; }
+  try{ [db,userCap,downloadsCap]=await Promise.all([window.claude.use("db"),window.claude.use("user"),window.claude.use("downloads")]); }catch(e){ db=null; }
   if(userCap){ try{ isTeacher=(await userCap.canEdit())||(await userCap.isOwner()); }catch(e){} }
   if(isTeacher) $("teacherBtn").hidden=false;
   if(!db||!userCap) return;
@@ -577,6 +752,7 @@ if(restore(lsGet())) showTicket(); else selectQ("q1");
   try{
     const snap=await docRef.get();
     if(snap.exists){ if(restore(snap.data())) showTicket(); }
+    else if(state.submitted){ resetToStart(); } // teacher reset this student: start fresh
     else if(state.version){ flush(); }
   }catch(e){}
 })();

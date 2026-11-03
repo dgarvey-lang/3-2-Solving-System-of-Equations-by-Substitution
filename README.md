@@ -11,6 +11,7 @@ Answers and drawings are saved in the student's browser so a refresh doesn't era
 
 ## Exit ticket
 
-- `exit-ticket-substitution.html` – two-question exit ticket (Q1: both equations in slope-intercept form; Q2: one slope-intercept, one standard form) with **15 versions**. Students type their name, pick their version number, answer, and show work on a finger-drawing scratch pad on the right.
-- **Teacher view** (shows only for the teacher on the claude.ai copy): live list of every student's answers, auto-checked against the key, plus each student's scratch work. It also has an answer key for all 15 versions.
-- On GitHub Pages the ticket still works, but answers save only on the student's device, so there is no teacher view there.
+- `exit-ticket-substitution.html` – two-question exit ticket (Q1: both equations in slope-intercept form; Q2: one slope-intercept, one standard form) with **15 versions**. Students type their name and are given a version automatically (1, 2, 3 … 15, then it repeats). They show work on a finger-drawing scratch pad on the right.
+- When students turn it in, it is scored out of 4 (1 point each for x and y), answers lock, and they see their score. A **Save picture** button makes an image of their name, score, answers and scratch work to upload to Google Classroom.
+- **Teacher view** (only for the teacher on the claude.ai copy): every student's name, version, score, Q1/Q2 results and scratch work, live, plus an answer key for all 15 versions and a reset button per student.
+- On GitHub Pages the ticket and the picture still work, but versions are random and there is no teacher view.
