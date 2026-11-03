@@ -1,0 +1,584 @@
+<title>Substitution Exit Ticket</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=STIX+Two+Text:ital,wght@0,500;1,500&display=swap">
+<style>
+/* Layout: graph-paper worksheet. Questions scroll on the left; a sticky scratch sheet sits on the right (full-screen sheet on phones). */
+:root{
+  --bg:#eef2f6; --surface:#ffffff; --ink:#18232f; --muted:#5a6876; --line:#d3dbe4;
+  --accent:#1f56c9; --accent-ink:#ffffff; --mark:#f3c43a; --good:#1b7f4b; --bad:#b4332b; --warn:#9a6a00;
+  --pad-bg:#fdfefe; --pad-grid:rgba(31,86,201,.10); --pad-grid-strong:rgba(31,86,201,.20);
+  --f-display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --f-body:"Atkinson Hyperlegible",ui-sans-serif,system-ui,sans-serif;
+  --f-math:"STIX Two Text","Cambria Math","Times New Roman",serif;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f151c; --surface:#18212b; --ink:#e4eaf0; --muted:#9aa8b6; --line:#2b3744;
+  --accent:#7fa3ff; --accent-ink:#0b1220; --mark:#e0b42c; --good:#5fd394; --bad:#ff8b80; --warn:#f1c25b;
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f151c; --surface:#18212b; --ink:#e4eaf0; --muted:#9aa8b6; --line:#2b3744;
+  --accent:#7fa3ff; --accent-ink:#0b1220; --mark:#e0b42c; --good:#5fd394; --bad:#ff8b80; --warn:#f1c25b;
+  color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.5}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.m{font-family:var(--f-math);font-size:1.15em}
+.m i{font-style:italic}
+
+.top{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding-block:12px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  border-bottom:1px solid var(--line);background:var(--surface)}
+.top h1{font-family:var(--f-display);font-weight:800;font-size:1.25rem;margin:0;letter-spacing:-.01em;text-wrap:balance}
+.top .sub{color:var(--muted);font-size:.9rem}
+.top .spacer{flex:1}
+.chip{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:.85rem;color:var(--muted)}
+.btn{border:1px solid var(--line);background:var(--surface);border-radius:10px;padding:8px 14px;font-weight:700}
+.btn:hover{border-color:var(--accent)}
+.btn.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.btn.small{padding:5px 10px;font-size:.9rem}
+
+.split{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.05fr);gap:0;min-height:calc(100% - 60px)}
+.work{padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:16px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:12px}
+.card h2{font-family:var(--f-display);font-weight:600;font-size:1.1rem;margin:0}
+.qnum{display:inline-grid;place-items:center;width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--surface);font-family:var(--f-display);font-weight:800;margin-right:8px;font-size:.95rem}
+.q.active{border-color:var(--accent);box-shadow:0 0 0 2px color-mix(in srgb,var(--accent) 30%,transparent)}
+.system{display:flex;flex-direction:column;gap:2px;padding:10px 14px;border-left:3px solid var(--mark);font-size:1.25rem;background:color-mix(in srgb,var(--mark) 8%,transparent);border-radius:0 8px 8px 0}
+.hint{color:var(--muted);font-size:.92rem;margin:0}
+.answer{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px}
+.answer label{display:flex;align-items:center;gap:6px;font-family:var(--f-math);font-size:1.25rem}
+.answer input{width:84px;padding:6px 8px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);font-family:var(--f-body);font-size:1.1rem;text-align:center}
+.answer input:focus{border-color:var(--accent)}
+.row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.field{display:flex;flex-direction:column;gap:4px;font-weight:700;font-size:.95rem}
+.field input,.field select{padding:9px 10px;border:1.5px solid var(--line);border-radius:8px;background:var(--bg);font-weight:400;min-width:0}
+.status{font-size:.95rem;color:var(--muted)}
+.status.ok{color:var(--good);font-weight:700}
+.status.err{color:var(--bad);font-weight:700}
+.pad-open{display:none}
+
+/* Scratch pad */
+.pad{position:sticky;top:0;height:100vh;height:100dvh;display:flex;flex-direction:column;border-left:1px solid var(--line);background:var(--surface);min-width:0}
+.pad-head{display:flex;flex-direction:column;gap:8px;padding:12px 16px;padding-right:max(16px,env(safe-area-inset-right,0px));border-bottom:1px solid var(--line)}
+.tabs{display:flex;gap:6px;align-items:center}
+.tab{border:1px solid var(--line);background:transparent;border-radius:8px;padding:5px 12px;font-weight:700}
+.tab[aria-selected="true"]{background:var(--ink);color:var(--surface);border-color:var(--ink)}
+.pad-sys{font-size:1.05rem;display:flex;gap:4px 18px;flex-wrap:wrap}
+.tools{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.swatch{width:30px;height:30px;border-radius:50%;border:2px solid var(--line);padding:0}
+.swatch[aria-pressed="true"],.tool[aria-pressed="true"]{outline:3px solid var(--accent);outline-offset:1px}
+.tool{border:1px solid var(--line);background:var(--surface);border-radius:8px;padding:4px 10px;font-weight:700;font-size:.9rem}
+.sheet{position:relative;flex:1;min-height:0;margin:0;background-color:var(--pad-bg);
+  background-image:linear-gradient(var(--pad-grid-strong) 1px,transparent 1px),linear-gradient(90deg,var(--pad-grid-strong) 1px,transparent 1px),
+  linear-gradient(var(--pad-grid) 1px,transparent 1px),linear-gradient(90deg,var(--pad-grid) 1px,transparent 1px);
+  background-size:100px 100px,100px 100px,20px 20px,20px 20px}
+.sheet canvas{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair}
+.close-pad{display:none}
+
+@media (max-width:860px){
+  .split{grid-template-columns:minmax(0,1fr)}
+  .work{padding-right:max(16px,env(safe-area-inset-right,0px))}
+  .pad-open{display:inline-block}
+  .pad{position:fixed;inset:0;height:auto;z-index:20;border-left:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+  .pad:not(.open){display:none}
+  .close-pad{display:inline-block;margin-left:auto}
+}
+
+/* Teacher view */
+.teacher{position:fixed;inset:0;z-index:30;background:var(--bg);overflow:auto;padding-top:env(safe-area-inset-top,0px)}
+.t-wrap{max-width:1180px;margin:0 auto;padding-block:16px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:16px}
+.t-head{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.t-head h2{font-family:var(--f-display);font-weight:800;font-size:1.4rem;margin:0}
+.summary{display:flex;gap:18px;flex-wrap:wrap;color:var(--muted);font-size:.95rem}
+.summary b{color:var(--ink);font-variant-numeric:tabular-nums}
+.tbl-wrap{overflow-x:auto;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{text-align:left;padding:9px 12px;border-bottom:1px solid var(--line);white-space:nowrap;vertical-align:top}
+th{font-size:.8rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted)}
+tbody tr.click{cursor:pointer}
+tbody tr.click:hover{background:color-mix(in srgb,var(--accent) 7%,transparent)}
+tr:last-child td{border-bottom:0}
+.pill{display:inline-block;border-radius:999px;padding:1px 9px;font-size:.82rem;font-weight:700;border:1px solid currentColor}
+.pill.good{color:var(--good)} .pill.bad{color:var(--bad)} .pill.warn{color:var(--warn)} .pill.muted{color:var(--muted)}
+.detail{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.detail .card{gap:10px}
+.mini-sheet{position:relative;border:1px solid var(--line);border-radius:8px;overflow:hidden;background-color:var(--pad-bg);
+  background-image:linear-gradient(var(--pad-grid) 1px,transparent 1px),linear-gradient(90deg,var(--pad-grid) 1px,transparent 1px);background-size:12px 12px}
+.mini-sheet canvas{display:block;width:100%}
+.empty{color:var(--muted);font-style:italic}
+.confirm{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+@media (max-width:760px){.detail{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<header class="top">
+  <h1>Exit Ticket · Solving Systems by Substitution</h1>
+  <span class="chip" id="verChip" hidden></span>
+  <span class="spacer"></span>
+  <button class="btn small" id="teacherBtn" hidden>Teacher view</button>
+</header>
+
+<main class="split">
+  <section class="work" id="work">
+    <div class="card" id="startCard">
+      <h2>Before you start</h2>
+      <p class="hint">Type your name and pick the version number your teacher gave you.</p>
+      <div class="row">
+        <label class="field" style="flex:1 1 200px">Your name
+          <input id="nameInput" autocomplete="name" placeholder="First and last name">
+        </label>
+        <label class="field">Version
+          <select id="verSelect"></select>
+        </label>
+      </div>
+      <div class="row">
+        <button class="btn primary" id="startBtn">Start</button>
+        <span class="status" id="startMsg"></span>
+      </div>
+    </div>
+
+    <div id="ticket" hidden style="display:flex;flex-direction:column;gap:18px">
+      <p class="hint" id="whoLine"></p>
+      <div class="card q" id="q1Card" data-q="q1">
+        <h2><span class="qnum">1</span>Solve the system by substitution.</h2>
+        <div class="system m" id="q1Sys"></div>
+        <p class="hint">Both equations are in slope-intercept form. Show your steps on the scratch pad.</p>
+        <div class="answer">
+          <span>Solution:</span>
+          <label><i>x</i> = <input id="q1x" inputmode="numeric" autocomplete="off" aria-label="Question 1 x value"></label>
+          <label><i>y</i> = <input id="q1y" inputmode="numeric" autocomplete="off" aria-label="Question 1 y value"></label>
+          <button class="btn small pad-open" data-q="q1">✏️ Scratch pad</button>
+        </div>
+      </div>
+      <div class="card q" id="q2Card" data-q="q2">
+        <h2><span class="qnum">2</span>Solve the system by substitution.</h2>
+        <div class="system m" id="q2Sys"></div>
+        <p class="hint">One equation is in slope-intercept form and one is in standard form.</p>
+        <div class="answer">
+          <span>Solution:</span>
+          <label><i>x</i> = <input id="q2x" inputmode="numeric" autocomplete="off" aria-label="Question 2 x value"></label>
+          <label><i>y</i> = <input id="q2y" inputmode="numeric" autocomplete="off" aria-label="Question 2 y value"></label>
+          <button class="btn small pad-open" data-q="q2">✏️ Scratch pad</button>
+        </div>
+      </div>
+      <div class="card">
+        <div class="row">
+          <button class="btn primary" id="submitBtn">Turn in</button>
+          <span class="status" id="saveMsg"></span>
+        </div>
+        <p class="hint">Your work saves as you go. You can still fix answers after you turn in.</p>
+      </div>
+    </div>
+  </section>
+
+  <aside class="pad" id="pad" aria-label="Scratch pad">
+    <div class="pad-head">
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-q="q1" aria-selected="true">Question 1</button>
+        <button class="tab" role="tab" data-q="q2" aria-selected="false">Question 2</button>
+        <button class="btn small close-pad" id="closePad">Done</button>
+      </div>
+      <div class="pad-sys m" id="padSys"></div>
+      <div class="tools">
+        <button class="swatch" data-color="#1b2430" style="background:#1b2430" aria-label="Black pen" aria-pressed="true"></button>
+        <button class="swatch" data-color="#1f56c9" style="background:#1f56c9" aria-label="Blue pen" aria-pressed="false"></button>
+        <button class="swatch" data-color="#c62f26" style="background:#c62f26" aria-label="Red pen" aria-pressed="false"></button>
+        <button class="tool" id="eraserBtn" aria-pressed="false">Eraser</button>
+        <button class="tool" id="undoBtn">Undo</button>
+        <button class="tool" id="clearBtn">Clear</button>
+      </div>
+    </div>
+    <div class="sheet" id="sheet"><canvas id="canvas"></canvas></div>
+  </aside>
+</main>
+
+<div class="teacher" id="teacher" hidden>
+  <div class="t-wrap">
+    <div class="t-head">
+      <h2>Teacher view</h2>
+      <span class="spacer" style="flex:1"></span>
+      <div class="tabs" role="tablist">
+        <button class="tab" role="tab" data-t="work" aria-selected="true">Student work</button>
+        <button class="tab" role="tab" data-t="key" aria-selected="false">Answer key</button>
+      </div>
+      <button class="btn small" id="closeTeacher">Back to ticket</button>
+    </div>
+    <div id="tWork">
+      <div class="summary" id="tSummary"></div>
+      <p class="status" id="tStatus"></p>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Student</th><th>Version</th><th>Q1</th><th>Q2</th><th>Status</th><th>Last saved</th></tr></thead>
+        <tbody id="tRows"></tbody>
+      </table></div>
+      <div id="tDetail" style="margin-top:16px"></div>
+    </div>
+    <div id="tKey" hidden>
+      <div class="tbl-wrap"><table>
+        <thead><tr><th>Ver.</th><th>Question 1</th><th>Answer</th><th>Question 2</th><th>Answer</th></tr></thead>
+        <tbody id="keyRows"></tbody>
+      </table></div>
+    </div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+// ---------- Versions ----------
+// Q1: y = a x + b and y = c x + d, solution (x, y). Constants are computed so every answer is exact.
+const Q1 = [[2,-1,3,5],[3,1,2,7],[-2,1,1,4],[4,2,-1,-3],[1,-3,2,1],[5,2,1,6],[-1,2,4,-2],[3,-2,-2,-1],
+            [2,4,3,2],[-3,1,2,0],[1,4,-2,3],[6,3,1,8],[-2,3,-1,5],[2,-2,4,6],[-4,-1,2,-5]];
+// Q2: y = m x + b and A x + B y = C, solution (x, y).
+const Q2 = [[2,3,1,2,5],[1,2,1,4,1],[3,1,2,1,1],[-1,3,1,2,4],[2,1,1,3,1],[4,2,1,-1,-2],[-2,4,1,3,1],[1,3,2,-2,2],
+            [3,2,-1,2,5],[-3,5,1,1,-1],[2,1,3,-1,1],[5,3,1,1,1],[-1,2,3,-3,4],[1,4,-1,6,1],[4,1,1,2,7]];
+const VERSIONS = Q1.map((q1,i)=>{
+  const [a,c,x1,y1]=q1, [m,A,B,x2,y2]=Q2[i];
+  return {
+    q1:{a, b:y1-a*x1, c, d:y1-c*x1, x:x1, y:y1},
+    q2:{m, b:y2-m*x2, A, B, C:A*x2+B*y2, x:x2, y:y2}
+  };
+});
+
+const MINUS="−";
+const num=n=>n<0?MINUS+Math.abs(n):String(n);
+const coefVar=(k,v)=>(k===1?"":k===-1?MINUS:num(k))+"<i>"+v+"</i>";
+const plusConst=b=>b===0?"":(b>0?" + "+b:" "+MINUS+" "+Math.abs(b));
+const slopeEq=(m,b)=>"<i>y</i> = "+coefVar(m,"x")+plusConst(b);
+const stdEq=(A,B,C)=>coefVar(A,"x")+(B>0?" + ":" "+MINUS+" ")+(Math.abs(B)===1?"":Math.abs(B))+"<i>y</i> = "+num(C);
+function sysHTML(v,q){
+  const p=VERSIONS[v-1][q];
+  return q==="q1" ? [slopeEq(p.a,p.b),slopeEq(p.c,p.d)] : [slopeEq(p.m,p.b),stdEq(p.A,p.B,p.C)];
+}
+const pairHTML=(x,y)=>"("+num(x)+", "+num(y)+")";
+
+// ---------- Storage helpers ----------
+const LS_KEY="subst-exit-ticket-v1";
+function lsGet(){try{return JSON.parse(localStorage.getItem(LS_KEY)||"null")}catch(e){return null}}
+function lsSet(o){try{localStorage.setItem(LS_KEY,JSON.stringify(o))}catch(e){}}
+
+// ---------- State ----------
+const $=id=>document.getElementById(id);
+const state={name:"",version:0,answers:{q1x:"",q1y:"",q2x:"",q2y:""},pads:{q1:{h:0,strokes:[]},q2:{h:0,strokes:[]}},submitted:false,submittedAt:null};
+let db=null, userCap=null, uid=null, docRef=null, isTeacher=false;
+let current="q1";
+
+const verSelect=$("verSelect");
+verSelect.innerHTML='<option value="">Pick…</option>'+VERSIONS.map((_,i)=>`<option value="${i+1}">${i+1}</option>`).join("");
+
+function showTicket(){
+  $("startCard").hidden=true;
+  $("ticket").hidden=false;
+  $("verChip").hidden=false;
+  $("verChip").textContent="Version "+state.version;
+  $("whoLine").textContent=state.name+" · Version "+state.version;
+  $("q1Sys").innerHTML=sysHTML(state.version,"q1").map(s=>"<div>"+s+"</div>").join("");
+  $("q2Sys").innerHTML=sysHTML(state.version,"q2").map(s=>"<div>"+s+"</div>").join("");
+  for(const k of ["q1x","q1y","q2x","q2y"]) $(k).value=state.answers[k]||"";
+  updateSubmitLabel();
+  selectQ(current);
+}
+function updateSubmitLabel(){
+  $("submitBtn").textContent=state.submitted?"Update my answers":"Turn in";
+}
+
+$("startBtn").addEventListener("click",()=>{
+  const name=$("nameInput").value.trim();
+  const v=parseInt(verSelect.value,10);
+  if(!name){$("startMsg").textContent="Type your name first.";$("startMsg").className="status err";return}
+  if(!v){$("startMsg").textContent="Pick your version number.";$("startMsg").className="status err";return}
+  state.name=name.slice(0,60); state.version=v;
+  showTicket(); persist(true);
+});
+
+for(const k of ["q1x","q1y","q2x","q2y"]){
+  $(k).addEventListener("input",e=>{state.answers[k]=e.target.value.slice(0,12);persist()});
+  $(k).addEventListener("focus",()=>selectQ(k.slice(0,2),false));
+}
+document.querySelectorAll(".q").forEach(c=>c.addEventListener("pointerdown",()=>selectQ(c.dataset.q,false)));
+document.querySelectorAll(".pad-open").forEach(b=>b.addEventListener("click",()=>{selectQ(b.dataset.q);$("pad").classList.add("open");resizeCanvas()}));
+$("closePad").addEventListener("click",()=>$("pad").classList.remove("open"));
+
+$("submitBtn").addEventListener("click",async()=>{
+  state.submitted=true; state.submittedAt=new Date().toISOString();
+  updateSubmitLabel();
+  const ok=await persist(true);
+  const msg=$("saveMsg");
+  if(db&&docRef){ msg.textContent=ok?"Turned in. Your teacher can see your work.":"Couldn't reach the server. Your work is saved on this device; try again in a moment."; msg.className="status "+(ok?"ok":"err"); }
+  else { msg.textContent="Saved on this device. Show your teacher this screen."; msg.className="status ok"; }
+});
+
+// ---------- Saving ----------
+let saveTimer=null, saving=false, pending=false;
+function snapshot(){
+  return {name:state.name,version:state.version,answers:{...state.answers},pads:state.pads,submitted:state.submitted,submittedAt:state.submittedAt,updatedAt:new Date().toISOString()};
+}
+function persist(now){
+  lsSet(snapshot());
+  if(!state.version) return Promise.resolve(false);
+  clearTimeout(saveTimer);
+  if(now) return flush();
+  saveTimer=setTimeout(flush,2500);
+  return Promise.resolve(true);
+}
+async function flush(){
+  if(!db||!docRef) return false;
+  if(saving){pending=true;return true}
+  saving=true; let ok=true;
+  try{ await docRef.set(snapshot()); if(!state.submitted){$("saveMsg").textContent="Saved";$("saveMsg").className="status";} }
+  catch(e){ ok=false; $("saveMsg").textContent="Not saved to server yet. Keep working; it will retry."; $("saveMsg").className="status err"; }
+  saving=false;
+  if(pending){pending=false; return flush();}
+  return ok;
+}
+
+// ---------- Scratch pad ----------
+const canvas=$("canvas"), sheet=$("sheet"), ctx=canvas.getContext("2d");
+let cssW=1, cssH=1, dpr=1;
+const tool={color:"#1b2430",erase:false};
+const PEN=4, ERASER=34;
+
+function selectQ(q,scroll){
+  current=q;
+  document.querySelectorAll("#pad .tab").forEach(t=>t.setAttribute("aria-selected",String(t.dataset.q===q)));
+  document.querySelectorAll(".q").forEach(c=>c.classList.toggle("active",c.dataset.q===q));
+  if(state.version) $("padSys").innerHTML="<b style='font-family:var(--f-body);font-size:.85rem'>Q"+q[1]+"</b> "+sysHTML(state.version,q).map(s=>"<span>"+s+"</span>").join("");
+  else $("padSys").textContent="Start the ticket to see your problems here.";
+  redraw();
+}
+document.querySelectorAll("#pad .tab").forEach(t=>t.addEventListener("click",()=>{
+  selectQ(t.dataset.q);
+  const card=$(t.dataset.q+"Card"); if(card&&window.innerWidth>860) card.scrollIntoView({behavior:"smooth",block:"nearest"});
+}));
+
+function resizeCanvas(){
+  const r=sheet.getBoundingClientRect();
+  if(r.width<2||r.height<2) return;
+  cssW=r.width; cssH=r.height; dpr=window.devicePixelRatio||1;
+  canvas.width=Math.round(cssW*dpr); canvas.height=Math.round(cssH*dpr);
+  redraw();
+}
+new ResizeObserver(resizeCanvas).observe(sheet);
+
+function drawStrokes(c,strokes,scale){
+  c.lineCap="round"; c.lineJoin="round";
+  for(const s of strokes){
+    c.globalCompositeOperation=s.e?"destination-out":"source-over";
+    c.strokeStyle=s.c||"#1b2430"; c.fillStyle=s.c||"#1b2430";
+    c.lineWidth=s.s*scale;
+    const p=s.p;
+    if(p.length<=2){ c.beginPath(); c.arc(p[0]*scale,p[1]*scale,s.s*scale/2,0,Math.PI*2); c.fill(); continue; }
+    c.beginPath(); c.moveTo(p[0]*scale,p[1]*scale);
+    for(let i=2;i<p.length;i+=2) c.lineTo(p[i]*scale,p[i+1]*scale);
+    c.stroke();
+  }
+  c.globalCompositeOperation="source-over";
+}
+function redraw(){
+  ctx.setTransform(1,0,0,1,0,0); ctx.clearRect(0,0,canvas.width,canvas.height);
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  drawStrokes(ctx,state.pads[current].strokes,cssW/1000);
+}
+// Points are stored in a 1000-unit-wide space so the teacher view can redraw them at any size.
+function toLogical(e){const r=canvas.getBoundingClientRect();const k=1000/r.width;return [Math.round((e.clientX-r.left)*k),Math.round((e.clientY-r.top)*k)]}
+let live=null, livePointer=null;
+canvas.addEventListener("pointerdown",e=>{
+  if(!state.version){return}
+  if(live) return;
+  e.preventDefault(); canvas.setPointerCapture(e.pointerId); livePointer=e.pointerId;
+  const [x,y]=toLogical(e);
+  live={c:tool.erase?"#000":tool.color,s:tool.erase?ERASER:PEN,p:[x,y]}; if(tool.erase) live.e=1;
+  state.pads[current].strokes.push(live); redraw();
+});
+canvas.addEventListener("pointermove",e=>{
+  if(!live||e.pointerId!==livePointer) return;
+  const evs=e.getCoalescedEvents?e.getCoalescedEvents():[e];
+  for(const ev of (evs.length?evs:[e])){
+    const [x,y]=toLogical(ev), p=live.p, lx=p[p.length-2], ly=p[p.length-1];
+    if(Math.abs(x-lx)+Math.abs(y-ly)<3) continue;
+    p.push(x,y);
+    const k=cssW/1000; ctx.setTransform(dpr,0,0,dpr,0,0);
+    ctx.globalCompositeOperation=live.e?"destination-out":"source-over";
+    ctx.strokeStyle=live.c; ctx.lineWidth=live.s*k; ctx.lineCap="round";
+    ctx.beginPath(); ctx.moveTo(lx*k,ly*k); ctx.lineTo(x*k,y*k); ctx.stroke();
+    ctx.globalCompositeOperation="source-over";
+  }
+});
+function endStroke(e){
+  if(!live||e.pointerId!==livePointer) return;
+  const pad=state.pads[current];
+  pad.h=Math.max(pad.h||0,Math.round(cssH*1000/cssW));
+  live=null; livePointer=null; persist();
+}
+canvas.addEventListener("pointerup",endStroke);
+canvas.addEventListener("pointercancel",endStroke);
+
+document.querySelectorAll(".swatch").forEach(b=>b.addEventListener("click",()=>{
+  tool.color=b.dataset.color; tool.erase=false;
+  document.querySelectorAll(".swatch").forEach(s=>s.setAttribute("aria-pressed",String(s===b)));
+  $("eraserBtn").setAttribute("aria-pressed","false");
+}));
+$("eraserBtn").addEventListener("click",()=>{
+  tool.erase=!tool.erase; $("eraserBtn").setAttribute("aria-pressed",String(tool.erase));
+  if(tool.erase) document.querySelectorAll(".swatch").forEach(s=>s.setAttribute("aria-pressed","false"));
+  else document.querySelector(`.swatch[data-color="${tool.color}"]`).setAttribute("aria-pressed","true");
+});
+$("undoBtn").addEventListener("click",()=>{state.pads[current].strokes.pop();redraw();persist()});
+let clearArmed=null;
+$("clearBtn").addEventListener("click",()=>{
+  const b=$("clearBtn");
+  if(!clearArmed){ b.textContent="Tap again to clear"; clearArmed=setTimeout(()=>{b.textContent="Clear";clearArmed=null},2500); return; }
+  clearTimeout(clearArmed); clearArmed=null; b.textContent="Clear";
+  state.pads[current].strokes=[]; redraw(); persist();
+});
+
+// ---------- Grading (teacher side) ----------
+function parseAns(s){ if(s==null) return null; const t=String(s).replace(/−/g,"-").replace(/\s+/g,""); if(t==="") return null; const n=Number(t); return Number.isFinite(n)?n:NaN; }
+function grade(doc,q){
+  const v=VERSIONS[(doc.version||1)-1]; if(!v) return {cls:"muted",label:"—"};
+  const sol=v[q], a=doc.answers||{};
+  const x=parseAns(a[q+"x"]), y=parseAns(a[q+"y"]);
+  if(x===null&&y===null) return {cls:"muted",label:"Blank"};
+  if(x===sol.x&&y===sol.y) return {cls:"good",label:"Correct"};
+  if(x===sol.y&&y===sol.x&&sol.x!==sol.y) return {cls:"warn",label:"x and y swapped"};
+  if(x===sol.x) return {cls:"warn",label:"x right, y off"};
+  if(y===sol.y) return {cls:"warn",label:"y right, x off"};
+  return {cls:"bad",label:"Not yet"};
+}
+const lookFor={
+  "x and y swapped":"Solved correctly but wrote the ordered pair backward. Ask which value is x.",
+  "x right, y off":"Substitution worked. Check the step where x goes back into an equation to find y.",
+  "y right, x off":"Check how they combined like terms or divided when solving for x.",
+  "Not yet":"Look at the first line of work: did they set the two expressions for y equal (Q1) or replace y in the standard-form equation (Q2)? On Q2, check that the coefficient of y was distributed to both terms.",
+  "Blank":"No answer entered yet."
+};
+
+// ---------- Teacher view ----------
+let tDocs=[], tUnsub=null, tSelected=null, tTimer=null;
+function fmtTime(iso){ if(!iso) return "—"; const d=new Date(iso); if(isNaN(d)) return "—"; return d.toLocaleString([], {month:"short",day:"numeric",hour:"numeric",minute:"2-digit"}); }
+function pillEl(g){const s=document.createElement("span");s.className="pill "+g.cls;s.textContent=g.label;return s}
+function renderKey(){
+  $("keyRows").innerHTML=VERSIONS.map((v,i)=>`<tr><td><b>${i+1}</b></td><td class="m">${sysHTML(i+1,"q1").join("<br>")}</td><td class="m">${pairHTML(v.q1.x,v.q1.y)}</td><td class="m">${sysHTML(i+1,"q2").join("<br>")}</td><td class="m">${pairHTML(v.q2.x,v.q2.y)}</td></tr>`).join("");
+}
+function renderTeacher(){
+  const rows=$("tRows"); rows.textContent="";
+  const docs=tDocs.slice().sort((a,b)=>(a.d.name||"").localeCompare(b.d.name||""));
+  let turned=0,q1c=0,q2c=0;
+  for(const {id,d} of docs){
+    const g1=grade(d,"q1"), g2=grade(d,"q2");
+    if(d.submitted) turned++; if(g1.cls==="good") q1c++; if(g2.cls==="good") q2c++;
+    const tr=document.createElement("tr"); tr.className="click"; tr.tabIndex=0;
+    const td=t=>{const c=document.createElement("td"); if(t instanceof Node) c.appendChild(t); else c.textContent=t; tr.appendChild(c); return c};
+    const nm=document.createElement("b"); nm.textContent=d.name||"(no name)"; td(nm);
+    td(String(d.version||"—")); td(pillEl(g1)); td(pillEl(g2));
+    td(pillEl(d.submitted?{cls:"good",label:"Turned in"}:{cls:"muted",label:"Working"}));
+    td(fmtTime(d.updatedAt));
+    const open=()=>{tSelected=id;renderDetail()};
+    tr.addEventListener("click",open); tr.addEventListener("keydown",e=>{if(e.key==="Enter")open()});
+    rows.appendChild(tr);
+  }
+  if(!docs.length){const tr=document.createElement("tr");const c=document.createElement("td");c.colSpan=6;c.className="empty";c.textContent="No student work yet. Rows appear here as soon as students start.";tr.appendChild(c);rows.appendChild(tr)}
+  $("tSummary").innerHTML="";
+  const add=(label,val)=>{const s=document.createElement("span");s.innerHTML=label+": ";const b=document.createElement("b");b.textContent=val;s.appendChild(b);$("tSummary").appendChild(s)};
+  add("Students",docs.length); add("Turned in",turned); add("Q1 correct",q1c+" / "+docs.length); add("Q2 correct",q2c+" / "+docs.length);
+  if(tSelected) renderDetail();
+}
+function renderPadInto(container,pad){
+  container.textContent="";
+  const strokes=(pad&&pad.strokes)||[];
+  if(!strokes.length){const p=document.createElement("p");p.className="empty";p.textContent="No scratch work.";container.appendChild(p);return}
+  let maxY=0; for(const s of strokes) for(let i=1;i<s.p.length;i+=2) if(s.p[i]>maxY) maxY=s.p[i];
+  const hLog=Math.max(300,Math.min(Math.max(pad.h||0,maxY+40),4000));
+  const wrap=document.createElement("div"); wrap.className="mini-sheet";
+  const c=document.createElement("canvas"); wrap.appendChild(c); container.appendChild(wrap);
+  const w=wrap.clientWidth||500, r=window.devicePixelRatio||1, h=w*hLog/1000;
+  c.style.height=h+"px"; c.width=Math.round(w*r); c.height=Math.round(h*r);
+  const cx=c.getContext("2d"); cx.setTransform(r,0,0,r,0,0); drawStrokes(cx,strokes,w/1000);
+}
+function renderDetail(){
+  const box=$("tDetail"); box.textContent="";
+  const item=tDocs.find(t=>t.id===tSelected); if(!item){tSelected=null;return}
+  const d=item.d, v=VERSIONS[(d.version||1)-1];
+  const head=document.createElement("div"); head.className="t-head";
+  const h=document.createElement("h2"); h.style.fontSize="1.15rem"; h.textContent=(d.name||"(no name)")+" · Version "+d.version; head.appendChild(h);
+  const sp=document.createElement("span"); sp.style.flex="1"; head.appendChild(sp);
+  const conf=document.createElement("div"); conf.className="confirm";
+  const del=document.createElement("button"); del.className="btn small"; del.textContent="Reset this student";
+  del.addEventListener("click",()=>{
+    conf.textContent="";
+    const t=document.createElement("span"); t.textContent="Delete this student's answers and drawings?"; conf.appendChild(t);
+    const yes=document.createElement("button"); yes.className="btn small"; yes.style.color="var(--bad)"; yes.textContent="Delete";
+    yes.addEventListener("click",async()=>{try{await db.doc("tickets/"+item.id).delete();tSelected=null;box.textContent=""}catch(e){t.textContent="Couldn't delete. Try again."}});
+    const no=document.createElement("button"); no.className="btn small"; no.textContent="Cancel"; no.addEventListener("click",renderDetail);
+    conf.appendChild(yes); conf.appendChild(no);
+  });
+  conf.appendChild(del); head.appendChild(conf);
+  const close=document.createElement("button"); close.className="btn small"; close.textContent="Close"; close.addEventListener("click",()=>{tSelected=null;box.textContent=""}); head.appendChild(close);
+  box.appendChild(head);
+  const grid=document.createElement("div"); grid.className="detail"; box.appendChild(grid);
+  for(const q of ["q1","q2"]){
+    const card=document.createElement("div"); card.className="card";
+    const t=document.createElement("h2"); t.textContent="Question "+q[1]; card.appendChild(t);
+    const sys=document.createElement("div"); sys.className="system m"; sys.innerHTML=sysHTML(d.version,q).map(s=>"<div>"+s+"</div>").join(""); card.appendChild(sys);
+    const a=d.answers||{}; const g=grade(d,q);
+    const line=document.createElement("div"); line.className="row";
+    const ans=document.createElement("span"); ans.className="m"; ans.textContent="Student: ("+(a[q+"x"]||"?")+", "+(a[q+"y"]||"?")+")";
+    const key=document.createElement("span"); key.className="m"; key.style.color="var(--muted)"; key.innerHTML="Key: "+pairHTML(v[q].x,v[q].y);
+    line.appendChild(ans); line.appendChild(key); line.appendChild(pillEl(g)); card.appendChild(line);
+    if(g.cls!=="good"&&lookFor[g.label]){const p=document.createElement("p");p.className="hint";p.textContent=lookFor[g.label];card.appendChild(p)}
+    const padBox=document.createElement("div"); card.appendChild(padBox);
+    grid.appendChild(card);
+    renderPadInto(padBox,(d.pads||{})[q]);
+  }
+  box.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+function openTeacher(){
+  $("teacher").hidden=false; renderKey(); renderTeacher();
+  if(!db){$("tStatus").textContent="Student work can't be collected in this copy of the page. Use the Answer key tab.";return}
+  if(tUnsub) return;
+  $("tStatus").textContent="Loading student work…";
+  tTimer=setTimeout(()=>{$("tStatus").textContent="Still waiting for student work to load. Check your connection."},10000);
+  tUnsub=db.collection("tickets").onSnapshot(snap=>{
+    tDocs=snap.docs.map(s=>({id:s.id,d:s.data()||{}}));
+    if(!snap.metadata.fromCache){clearTimeout(tTimer);$("tStatus").textContent="Updates live as students work."}
+    renderTeacher();
+  },err=>{clearTimeout(tTimer);tUnsub=null;$("tStatus").textContent="Couldn't load student work ("+err.code+"). Close and reopen this view to try again."});
+}
+$("teacherBtn").addEventListener("click",openTeacher);
+$("closeTeacher").addEventListener("click",()=>{$("teacher").hidden=true});
+document.querySelectorAll("#teacher .tab").forEach(t=>t.addEventListener("click",()=>{
+  document.querySelectorAll("#teacher .tab").forEach(x=>x.setAttribute("aria-selected",String(x===t)));
+  $("tWork").hidden=t.dataset.t!=="work"; $("tKey").hidden=t.dataset.t!=="key";
+}));
+
+// ---------- Boot ----------
+function restore(o){
+  if(!o||!o.version) return false;
+  state.name=o.name||""; state.version=o.version; state.answers={q1x:"",q1y:"",q2x:"",q2y:"",...(o.answers||{})};
+  state.pads={q1:{h:0,strokes:[]},q2:{h:0,strokes:[]},...(o.pads||{})};
+  state.submitted=!!o.submitted; state.submittedAt=o.submittedAt||null;
+  return true;
+}
+if(restore(lsGet())) showTicket(); else selectQ("q1");
+
+(async function connect(){
+  if(!window.claude||!window.claude.use) return;
+  try{ [db,userCap]=await Promise.all([window.claude.use("db"),window.claude.use("user")]); }catch(e){ db=null; }
+  if(userCap){ try{ isTeacher=(await userCap.canEdit())||(await userCap.isOwner()); }catch(e){} }
+  if(isTeacher) $("teacherBtn").hidden=false;
+  if(!db||!userCap) return;
+  try{ uid=await userCap.id(); }catch(e){ uid=null; }
+  if(!uid) return;
+  try{ docRef=db.doc("tickets/"+uid); }catch(e){ docRef=null; return; }
+  try{
+    const snap=await docRef.get();
+    if(snap.exists){ if(restore(snap.data())) showTicket(); }
+    else if(state.version){ flush(); }
+  }catch(e){}
+})();
+})();
+</script>
