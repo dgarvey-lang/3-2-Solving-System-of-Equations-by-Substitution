@@ -1,0 +1,185 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Review Score Viewer</title>
+<style>
+  :root { --bg:#f4f6fb; --card:#fff; --ink:#1f2937; --muted:#5b6475; --line:#d7dce6; --accent:#2f5bd3; --good:#1b7f3b; --bad:#b42318; --warn:#8a5a00; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+  main { max-width: 1200px; margin: 0 auto; padding: 24px 16px 60px; }
+  h1 { margin: 0 0 4px; font-size: 1.5rem; }
+  .muted { color: var(--muted); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 20px; margin: 16px 0; }
+  .drop { border: 3px dashed #b9c9f5; border-radius: 14px; padding: 28px; text-align: center; background: #fbfcff; cursor: pointer; }
+  .drop.over { background: #e8eefc; }
+  button { font: inherit; font-weight: 600; border-radius: 10px; padding: 8px 16px; cursor: pointer; border: 2px solid var(--accent); background: var(--accent); color: #fff; }
+  button.light { background: #fff; color: var(--accent); }
+  .stats { display: flex; flex-wrap: wrap; gap: 24px; }
+  .stat b { display: block; font-size: 1.6rem; color: var(--accent); }
+  .wrap { overflow-x: auto; }
+  table { border-collapse: collapse; width: 100%; font-size: .92rem; }
+  th, td { padding: 6px 8px; border-bottom: 1px solid var(--line); text-align: left; white-space: nowrap; }
+  th { color: var(--muted); font-weight: 600; cursor: pointer; user-select: none; }
+  td.r { text-align: center; }
+  .ok { color: var(--good); font-weight: 700; } .half { color: var(--warn); font-weight: 700; } .no { color: var(--bad); font-weight: 700; }
+  .flag { color: var(--bad); font-weight: 700; }
+</style>
+</head>
+<body>
+<main>
+  <h1>Alg 2B Review: Radicals &amp; Quadratics — Teacher Score Viewer</h1>
+  <p class="muted">Students download a score file when they finish. Collect those files (for example from Google Classroom), then drop them all here at once. Nothing is uploaded anywhere — this page reads the files on your computer.</p>
+
+  <div class="drop" id="drop">
+    <p><strong>Drop student score files here</strong> or click to choose them</p>
+    <p class="muted">Files are named like <code>Radicals-Quadratics-Score_First-Last.html</code>. You can pick many at once.</p>
+    <input type="file" id="file" multiple accept=".html,.htm,.json" hidden>
+  </div>
+
+  <div class="card" id="summary" hidden>
+    <div class="stats" id="stats"></div>
+    <p style="margin:12px 0 0">
+      <button id="csv">⬇ Download spreadsheet (CSV)</button>
+      <button class="light" id="clear">Clear list</button>
+    </p>
+  </div>
+
+  <div class="card wrap" id="tableCard" hidden>
+    <table id="tbl"></table>
+    <p class="muted" style="font-size:.85rem">✓ = right first try (1 pt) · ½ = right on the similar problem · ✗ = missed both · — = not finished.
+      <span class="flag">⚠ edited</span> means the file was changed after the student downloaded it. Click a column heading to sort.</p>
+  </div>
+
+  <div class="card wrap" id="qCard" hidden>
+    <h2 style="margin:0 0 8px;font-size:1.1rem">How the class did on each question</h2>
+    <table id="qtbl"></table>
+  </div>
+</main>
+<script>
+(function () {
+  var SALT = "pa-alg2b-7Q2x";
+  var APP = "alg2b-radicals-quadratics-review";
+  var rows = [], sortKey = "name", sortDir = 1;
+
+  function hash(str) {
+    var h = 5381;
+    for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+    return (h >>> 0).toString(36);
+  }
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  function parse(text, fname) {
+    var json = text;
+    if (/<html|<script/i.test(text)) {
+      var doc = new DOMParser().parseFromString(text, "text/html");
+      var el = doc.getElementById("score-data");
+      if (!el) throw new Error("no score data");
+      json = el.textContent;
+    }
+    var r = JSON.parse(json);
+    if (r.app !== APP) throw new Error("not a score file for this review");
+    var check = r.check; delete r.check;
+    r.valid = hash(SALT + JSON.stringify(r)) === check;
+    r.file = fname;
+    return r;
+  }
+
+  function addFiles(list) {
+    var files = Array.prototype.slice.call(list), left = files.length, problems = [];
+    files.forEach(function (f) {
+      var rd = new FileReader();
+      rd.onload = function () {
+        try {
+          var r = parse(rd.result, f.name);
+          var key = r.name + "|" + r.finished;
+          if (!rows.some(function (x) { return x.name + "|" + x.finished === key; })) rows.push(r);
+        } catch (e) { problems.push(f.name); }
+        if (--left === 0) {
+          draw();
+          if (problems.length) alert("These files couldn't be read as score files:\n" + problems.join("\n"));
+        }
+      };
+      rd.readAsText(f);
+    });
+  }
+
+  var COLS = [
+    ["name", "Student"], ["period", "Period"], ["points", "Score"], ["percent", "%"], ["firstTry", "1st try ✓"],
+    ["attempt", "Attempt"], ["finished", "Finished"], ["set", "Problem set"]
+  ];
+
+  function draw() {
+    var has = rows.length > 0;
+    ["summary", "tableCard", "qCard"].forEach(function (id) { document.getElementById(id).hidden = !has; });
+    if (!has) return;
+    rows.sort(function (a, b) {
+      var x = a[sortKey], y = b[sortKey];
+      if (typeof x === "string") return sortDir * x.localeCompare(y, undefined, { numeric: true });
+      return sortDir * ((x || 0) - (y || 0));
+    });
+    var avg = rows.reduce(function (s, r) { return s + r.percent; }, 0) / rows.length;
+    var names = {};
+    rows.forEach(function (r) { names[r.name.toLowerCase()] = 1; });
+    document.getElementById("stats").innerHTML =
+      '<div class="stat"><b>' + Object.keys(names).length + "</b>students</div>" +
+      '<div class="stat"><b>' + rows.length + "</b>score files</div>" +
+      '<div class="stat"><b>' + avg.toFixed(1) + "%</b>class average</div>";
+
+    var head = "<tr>" + COLS.map(function (c) { return '<th data-k="' + c[0] + '">' + c[1] + (sortKey === c[0] ? (sortDir > 0 ? " ▲" : " ▼") : "") + "</th>"; }).join("");
+    for (var i = 1; i <= 12; i++) head += '<th class="r">Q' + i + "</th>";
+    head += "</tr>";
+    var body = rows.map(function (r) {
+      var cls = { "✓": "ok", "½": "half", "✗": "no" };
+      return "<tr><td>" + esc(r.name) + (r.valid ? "" : ' <span class="flag">⚠ edited</span>') + "</td><td>" + esc(r.period) + "</td><td>" + r.points + " / " + r.outOf +
+        "</td><td>" + r.percent + "%</td><td>" + r.firstTry + "</td><td>" + r.attempt + "</td><td>" + new Date(r.finished).toLocaleString() +
+        "</td><td>" + esc(r.set) + "</td>" +
+        r.results.map(function (x) { return '<td class="r ' + (cls[x.result] || "") + '">' + esc(x.result) + "</td>"; }).join("") + "</tr>";
+    }).join("");
+    var tbl = document.getElementById("tbl");
+    tbl.innerHTML = head + body;
+    tbl.querySelectorAll("th[data-k]").forEach(function (th) {
+      th.addEventListener("click", function () {
+        var k = th.dataset.k;
+        sortDir = sortKey === k ? -sortDir : (k === "name" || k === "period" ? 1 : -1);
+        sortKey = k; draw();
+      });
+    });
+
+    var q = "<tr><th>#</th><th>Topic</th><th>✓ first try</th><th>½ similar</th><th>✗ missed</th><th>Avg points</th></tr>";
+    for (var n = 0; n < 12; n++) {
+      var c = { "✓": 0, "½": 0, "✗": 0, "—": 0 }, topic = "";
+      rows.forEach(function (r) { var x = r.results[n]; if (x) { c[x.result] = (c[x.result] || 0) + 1; topic = x.topic; } });
+      var pts = (c["✓"] + c["½"] / 2) / rows.length;
+      q += "<tr><td>" + (n + 1) + "</td><td>" + esc(topic) + '</td><td class="ok">' + c["✓"] + '</td><td class="half">' + c["½"] +
+        '</td><td class="no">' + (c["✗"] + c["—"]) + "</td><td>" + pts.toFixed(2) + "</td></tr>";
+    }
+    document.getElementById("qtbl").innerHTML = q;
+  }
+
+  function csvCell(v) { v = String(v == null ? "" : v); return /[",\n]/.test(v) ? '"' + v.replace(/"/g, '""') + '"' : v; }
+  document.getElementById("csv").addEventListener("click", function () {
+    var head = ["Student", "Period", "Points", "Out of", "Percent", "First try right", "Attempt", "Finished", "Problem set", "File OK"];
+    for (var i = 1; i <= 12; i++) head.push("Q" + i);
+    var lines = [head.join(",")].concat(rows.map(function (r) {
+      return [r.name, r.period, r.points, r.outOf, r.percent, r.firstTry, r.attempt, new Date(r.finished).toLocaleString(), r.set, r.valid ? "yes" : "EDITED"]
+        .concat(r.results.map(function (x) { return x.result === "✓" ? 1 : x.result === "½" ? 0.5 : 0; })).map(csvCell).join(",");
+    }));
+    var blob = new Blob(["﻿" + lines.join("\r\n")], { type: "text/csv" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = "Radicals-Quadratics-Review-Scores.csv";
+    document.body.appendChild(a); a.click(); a.remove();
+  });
+  document.getElementById("clear").addEventListener("click", function () { rows = []; draw(); });
+
+  var drop = document.getElementById("drop"), input = document.getElementById("file");
+  drop.addEventListener("click", function () { input.click(); });
+  input.addEventListener("change", function () { addFiles(input.files); input.value = ""; });
+  drop.addEventListener("dragover", function (e) { e.preventDefault(); drop.classList.add("over"); });
+  drop.addEventListener("dragleave", function () { drop.classList.remove("over"); });
+  drop.addEventListener("drop", function (e) { e.preventDefault(); drop.classList.remove("over"); addFiles(e.dataTransfer.files); });
+})();
+</script>
+</body>
+</html>

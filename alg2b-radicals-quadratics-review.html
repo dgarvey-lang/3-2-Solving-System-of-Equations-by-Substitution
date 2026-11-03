@@ -1,0 +1,1189 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Radicals &amp; Quadratics Review</title>
+<style>
+  :root {
+    --bg: #f4f6fb;
+    --card: #ffffff;
+    --ink: #1f2937;
+    --muted: #5b6475;
+    --line: #d7dce6;
+    --accent: #2f5bd3;
+    --accent-soft: #e8eefc;
+    --good: #1b7f3b;
+    --good-soft: #e3f5e8;
+    --bad: #b42318;
+    --bad-soft: #fde8e6;
+    --help: #8a5a00;
+    --help-soft: #fff4d6;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--ink);
+    font: 18px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  }
+  [hidden] { display: none !important; }
+  .layout {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(360px, 42%);
+    max-width: 1600px;
+    margin: 0 auto;
+  }
+  main { padding: 24px 20px 64px; min-width: 0; }
+  header.top {
+    background: var(--accent);
+    color: #fff;
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+  }
+  header.top h1 { margin: 0 0 6px; font-size: 1.5rem; }
+  header.top p { margin: 0; opacity: .95; }
+  .howto, .card {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px 20px 18px;
+    margin-bottom: 20px;
+  }
+  .howto { font-size: .95rem; }
+  .howto ol { margin: 6px 0 0; padding-left: 22px; }
+  .card h2 { margin: 0; font-size: 1.15rem; }
+  .card .tag { color: var(--muted); font-size: .9rem; margin: 0; }
+
+  .who { display: flex; flex-wrap: wrap; gap: 14px; align-items: end; }
+  .who label { display: flex; flex-direction: column; font-weight: 600; font-size: .95rem; gap: 4px; }
+  .who input { font: inherit; padding: 8px 12px; border: 2px solid #9aa6bd; border-radius: 8px; }
+  .who input.name { width: 260px; max-width: 100%; }
+  .who input.period { width: 110px; }
+  .who .warn { color: var(--bad); font-weight: 600; font-size: .95rem; }
+
+  .qhead { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+  .qnum {
+    flex: none; width: 38px; height: 38px; border-radius: 50%;
+    background: var(--accent); color: #fff; font-weight: 700;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .qhead .grow { flex: 1; min-width: 0; }
+  .badge { flex: none; font-size: .85rem; font-weight: 700; padding: 3px 10px; border-radius: 999px; border: 2px solid transparent; }
+  .badge.right { background: var(--good-soft); color: var(--good); border-color: #9fd3ae; }
+  .badge.fixed { background: var(--help-soft); color: var(--help); border-color: #f0d58a; }
+  .badge.missed { background: var(--bad-soft); color: var(--bad); border-color: #f2b3ac; }
+  .badge.retry { background: var(--accent-soft); color: var(--accent); border-color: #b9c9f5; }
+
+  .system {
+    display: inline-block;
+    background: var(--accent-soft);
+    border-left: 4px solid var(--accent);
+    border-radius: 8px;
+    padding: 8px 16px;
+    font-family: "Cambria Math", Cambria, Georgia, serif;
+    font-size: 1.25rem;
+    line-height: 1.7;
+    margin: 4px 0 12px;
+  }
+  .system .note { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-size: .9rem; color: var(--muted); display: block; line-height: 1.4; }
+  .math { font-family: "Cambria Math", Cambria, Georgia, serif; font-size: 1.15rem; }
+
+  /* radical sign with a bar over the radicand */
+  .rad { display: inline-flex; align-items: flex-start; white-space: nowrap; }
+  .rad > .rs { font-size: 1.1em; line-height: 1; padding-top: .08em; }
+  .rad > .ri { border-top: 2px solid currentColor; padding: 1px 2px 0; margin-top: .12em; line-height: 1.25; }
+  .fr { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 3px; }
+  .fr > span { padding: 0 4px; line-height: 1.35; }
+  .fr > span:first-child { border-bottom: 2px solid currentColor; }
+
+  .line { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; margin: 6px 0; }
+  .line .lbl { font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; font-size: .95rem; font-weight: 600; min-width: 34px; }
+  .fbox { display: inline-flex; flex-direction: column; align-items: center; gap: 4px; }
+  .fbox .barline { align-self: stretch; border-top: 2px solid var(--ink); }
+  .rbox { display: inline-flex; align-items: center; }
+  .rbox .rs { font-size: 1.6rem; line-height: 1; margin-right: 1px; }
+  .rbox .ri { border-top: 2px solid var(--ink); padding: 3px 2px 0; }
+  .tip { color: var(--muted); font-size: .85rem; margin: 2px 0 0; font-family: system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; }
+
+  input.box, select.box {
+    font: inherit;
+    font-family: "Cambria Math", Cambria, Georgia, serif;
+    font-size: 1.1rem;
+    padding: 6px 8px;
+    border: 2px solid #9aa6bd;
+    border-radius: 8px;
+    background: #fff;
+    color: var(--ink);
+    min-width: 0;
+  }
+  input.box { width: 80px; text-align: center; }
+  select.box { font-family: inherit; font-size: 1rem; max-width: 100%; }
+  input.box:focus, select.box:focus { outline: 3px solid #b9c9f5; border-color: var(--accent); }
+  .box:disabled { background: #f3f4f7; color: var(--ink); opacity: 1; }
+  .box.right { border-color: var(--good); background: var(--good-soft); }
+  .box.wrong { border-color: var(--bad); background: var(--bad-soft); }
+
+
+  .buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 12px; }
+  button {
+    font: inherit;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 9px 18px;
+    cursor: pointer;
+    border: 2px solid transparent;
+  }
+  button:disabled { opacity: .55; cursor: default; }
+  button.check { background: var(--accent); color: #fff; }
+  button.check:hover:not(:disabled) { filter: brightness(1.08); }
+  button.secondary { background: #fff; color: var(--accent); border-color: #b9c9f5; }
+
+  .feedback { margin-top: 12px; padding: 10px 14px; border-radius: 10px; font-weight: 600; }
+  .feedback:empty { display: none; }
+  .feedback.good { background: var(--good-soft); color: var(--good); }
+  .feedback.bad { background: var(--bad-soft); color: var(--bad); }
+  .feedback.almost { background: var(--help-soft); color: var(--help); }
+
+  .solution {
+    margin-top: 14px;
+    background: #fffaf0;
+    border: 1px solid #f0d58a;
+    border-left: 5px solid #e0b33c;
+    border-radius: 10px;
+    padding: 12px 16px;
+  }
+  .solution h3 { margin: 0 0 6px; font-size: 1rem; color: var(--help); }
+  .solution ol { margin: 0; padding-left: 24px; }
+  .solution li { margin-bottom: 6px; }
+  .solution .ans { font-weight: 700; }
+  .similar {
+    margin-top: 14px;
+    border: 2px dashed #b9c9f5;
+    border-radius: 12px;
+    padding: 12px 16px;
+    background: #fbfcff;
+  }
+  .similar h3 { margin: 0 0 4px; font-size: 1rem; color: var(--accent); }
+
+  .progress {
+    position: sticky; top: 0; z-index: 5;
+    background: var(--bg);
+    padding: 8px 0 10px;
+    margin-bottom: 8px;
+    font-size: .9rem; color: var(--muted);
+  }
+  .bar { height: 10px; background: #dde3ee; border-radius: 999px; overflow: hidden; margin-top: 4px; }
+  .bar > div { height: 100%; width: 0; background: var(--good); transition: width .3s; }
+
+  .results .big { font-size: 2.2rem; font-weight: 800; color: var(--accent); margin: 6px 0 0; }
+  .results table { border-collapse: collapse; width: 100%; margin-top: 10px; font-size: .95rem; }
+  .results th, .results td { text-align: left; padding: 6px; border-bottom: 1px solid var(--line); }
+  .results th { color: var(--muted); font-weight: 600; font-size: .85rem; }
+  .sent { margin-top: 10px; font-weight: 600; }
+  .sent.ok { color: var(--good); }
+  .sent.bad { color: var(--bad); }
+  .reset { text-align: center; margin-top: 10px; }
+  .reset button { background: transparent; color: var(--muted); border-color: var(--line); font-weight: 500; font-size: .9rem; }
+
+  /* ---------- split-screen scratch board ---------- */
+  .pad {
+    position: sticky; top: 0;
+    height: 100vh; height: 100dvh;
+    display: flex; flex-direction: column;
+    padding: 16px 16px 16px 4px;
+  }
+  .pad-inner {
+    flex: 1; min-height: 0;
+    display: flex; flex-direction: column;
+    background: var(--card);
+    border: 2px solid #9aa6bd;
+    border-radius: 14px;
+    overflow: hidden;
+  }
+  .pad-head {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--line);
+  }
+  .pad-head .grow { flex: 1; min-width: 0; }
+  .pad-title { font-weight: 700; }
+  .pad-title small { font-weight: 400; color: var(--muted); }
+  .pad-problem { margin-top: 4px; }
+  .pad-problem .system { margin: 0; font-size: 1.05rem; padding: 4px 12px; }
+  .pad-close { display: none; background: var(--accent); color: #fff; padding: 8px 14px; font-size: .95rem; }
+  .pad .tools {
+    display: flex; flex-wrap: wrap; gap: 6px; align-items: center;
+    padding: 6px 8px; background: #eef1f7; border-bottom: 1px solid var(--line);
+  }
+  .pad .tools button {
+    font-size: .9rem; padding: 6px 12px; border-radius: 8px;
+    background: #fff; color: var(--ink); border: 2px solid var(--line); font-weight: 600;
+  }
+  .pad .tools button.on { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+  .pad .tools .dot { display: inline-block; width: 12px; height: 12px; border-radius: 50%; vertical-align: -1px; margin-right: 4px; }
+  .pad .tools .spacer { flex: 1; }
+  .pad-stage {
+    flex: 1; min-height: 0;
+    display: flex; justify-content: flex-start; align-items: flex-start;
+    overflow: hidden; position: relative;
+    background: #f1f3f8;
+  }
+  .pad-stage canvas {
+    display: none;
+    touch-action: none; cursor: crosshair;
+    background-color: #fff;
+    background-image:
+      linear-gradient(#e9edf5 1px, transparent 1px),
+      linear-gradient(90deg, #e9edf5 1px, transparent 1px);
+    background-size: 24px 24px;
+  }
+  .pad-stage canvas.active { display: block; }
+  .pad-open { display: none; }
+
+  @media (max-width: 900px) {
+    .layout { display: block; }
+    main { max-width: 820px; margin: 0 auto; padding: 24px 16px 96px; }
+    .pad { display: none; }
+    .pad-open {
+      display: block; position: fixed; right: 16px; bottom: 16px; z-index: 20;
+      background: var(--accent); color: #fff;
+      border-radius: 999px; padding: 12px 20px;
+      box-shadow: 0 4px 14px rgba(0,0,0,.25);
+    }
+    body.pad-full { overflow: hidden; }
+    body.pad-full .pad {
+      display: flex; position: fixed; inset: 0; z-index: 30;
+      height: auto; padding: 8px; background: var(--bg);
+    }
+    body.pad-full .pad-close { display: inline-block; }
+    body.pad-full .pad-open { display: none; }
+  }
+  @media (max-width: 560px) {
+    body { font-size: 17px; }
+  }
+  @media print {
+    .layout { display: block; }
+    .pad, .pad-open, .progress, .reset, .howto, .buttons { display: none !important; }
+    .card { break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+<main>
+
+<header class="top">
+  <h1>Algebra 2B Review: Radicals &amp; Solving Quadratics</h1>
+  <p>12 questions · simplifying radicals · imaginary numbers · rationalizing · solving by square roots · solving by factoring</p>
+</header>
+
+<div class="howto">
+  <strong>How this review works:</strong>
+  <ol>
+    <li>Type your <strong>name</strong> and <strong>class period</strong> below first. Your problems are made just for you — your neighbor has different numbers!</li>
+    <li>Show your work on the <strong>scratch board</strong> on the right. Draw with your finger, a stylus, or a mouse. It switches to the question you're on. (On a phone, tap <strong>✏️ Scratch board</strong> at the bottom.)</li>
+    <li>Type your answer and press <strong>Check my answer</strong>. Right on the first try = <strong>1 point</strong>.</li>
+    <li>If it's wrong, you'll see how to do it step by step, then get a <strong>similar problem</strong>. Get that one right for <strong>½ point</strong>.</li>
+    <li>When you're done, press <strong>Submit &amp; see my score</strong> at the bottom.</li>
+  </ol>
+  <p class="tip" style="font-size:.9rem;margin-top:8px">Typing tips: leave a box blank if it's a 1. Use <strong>^</strong> for exponents (x^2 means x²). Type <strong>i</strong> for the imaginary unit. Fractions like <strong>-2/3</strong> are fine.</p>
+</div>
+
+<section class="card">
+  <div class="who">
+    <label>Your name <input class="name" id="stuName" autocomplete="name" placeholder="First Last"></label>
+    <label>Class period <input class="period" id="stuPeriod" placeholder="e.g. 3"></label>
+    <span class="warn" id="whoWarn" hidden>Please type your name first.</span>
+    <span class="tip" id="setCode" style="margin-left:auto"></span>
+  </div>
+</section>
+
+<div class="progress">
+  <span id="progressText">0 of 12 questions done</span>
+  <div class="bar"><div id="progressBar"></div></div>
+</div>
+
+<div id="questions"></div>
+
+<section class="card results" id="results">
+  <h2>Your score</h2>
+  <div id="resultsBody">
+    <p class="tag">Answer the questions above, then submit to see your score and send it to your teacher.</p>
+  </div>
+  <div class="buttons">
+    <button class="check" type="button" id="submitBtn">Submit &amp; see my score</button>
+    <button class="secondary" type="button" id="downloadBtn" hidden>⬇ Download my score file</button>
+  </div>
+  <div class="sent" id="sentMsg" hidden></div>
+</section>
+
+<div class="reset"><button type="button" id="resetAll">Start over (clears everything)</button></div>
+
+</main>
+
+<aside class="pad" aria-label="Scratch board">
+  <div class="pad-inner">
+    <div class="pad-head">
+      <div class="grow">
+        <div class="pad-title"></div>
+        <div class="pad-problem"></div>
+      </div>
+      <button type="button" class="pad-close">✕ Back to questions</button>
+    </div>
+    <div class="tools"></div>
+    <div class="pad-stage"></div>
+  </div>
+</aside>
+</div>
+
+<button type="button" class="pad-open">✏️ Scratch board</button>
+
+<script>
+(function () {
+  // =====================================================================
+  // TEACHER SETTINGS
+  // To have scores go straight into a Google Sheet, follow the steps in
+  // teacher/score-collector.gs and paste your Web App URL between the quotes.
+  // Leave it blank and students can still download a score file to turn in.
+  var SHEET_URL = "";
+  // =====================================================================
+
+  var APP = "alg2b-radicals-quadratics-review";
+  var STORE_KEY = APP + "-v1";
+  var SALT = "pa-alg2b-7Q2x";
+
+  // ---------- little math-display helpers ----------
+  function R(inner) { return '<span class="rad"><span class="rs">√</span><span class="ri">' + inner + "</span></span>"; }
+  function F(n, d) { return '<span class="fr"><span>' + n + "</span><span>" + d + "</span></span>"; }
+  function sup(n) { return "<sup>" + n + "</sup>"; }
+  var x2 = "x" + sup(2);
+
+  // ---------- answer boxes ----------
+  function box(f, label, w, ph) {
+    return '<input class="box" data-f="' + f + '" aria-label="' + label + '" autocomplete="off" autocapitalize="off" spellcheck="false"' +
+      (w ? ' style="width:' + w + 'px"' : "") + (ph ? ' placeholder="' + ph + '"' : "") + ">";
+  }
+  function radBox(prefix) {
+    prefix = prefix || "";
+    return '<span class="rbox">' + box(prefix + "out", "number outside the square root", 90) +
+      '<span class="rs">√</span><span class="ri">' + box(prefix + "in", "number inside the square root", 90) + "</span></span>";
+  }
+
+  // ---------- reading what students type ----------
+  var SUPS = { "⁰": 0, "¹": 1, "²": 2, "³": 3, "⁴": 4, "⁵": 5, "⁶": 6, "⁷": 7, "⁸": 8, "⁹": 9 };
+  function clean(s) {
+    return String(s == null ? "" : s)
+      .toLowerCase()
+      .replace(/[−–—]/g, "-")
+      .replace(/[⁰¹²³⁴⁵⁶⁷⁸⁹]/g, function (c) { return "^" + SUPS[c]; })
+      .replace(/[\s·×]/g, "")
+      .replace(/√/g, "");
+  }
+  function num(s) {
+    var t = clean(s).replace(/^x=/, "").replace(/^\+/, "").replace(/^\((.*)\)$/, "$1");
+    if (t === "") return NaN;
+    var m = t.match(/^(-?\d+(?:\.\d+)?)\/(-?\d+(?:\.\d+)?)$/);
+    if (m) return parseFloat(m[1]) / parseFloat(m[2]);
+    if (/^-?(\d+\.?\d*|\.\d+)$/.test(t)) return parseFloat(t);
+    return NaN;
+  }
+  function blank(s) { return clean(s) === ""; }
+  function same(a, b) { return Math.abs(a - b) < 1e-9; }
+
+  // a monomial like 4x^2y or 5i  ->  { c: 4, v: { x: 2, y: 1 } }
+  function mono(s, blankIsOne) {
+    var t = clean(s).replace(/[()]/g, "");
+    if (t === "") return blankIsOne ? { c: 1, v: {} } : null;
+    var sign = 1;
+    if (t[0] === "-") { sign = -1; t = t.slice(1); } else if (t[0] === "+") t = t.slice(1);
+    var c = sign, v = {}, pos = 0, re = /(\d+(?:\.\d+)?)|([a-z])(?:\^(\d+))?|(\*)/y;
+    while (pos < t.length) {
+      re.lastIndex = pos;
+      var m = re.exec(t);
+      if (!m) return null;
+      pos = re.lastIndex;
+      if (m[1]) c *= parseFloat(m[1]);
+      else if (m[2]) v[m[2]] = (v[m[2]] || 0) + (m[3] ? parseInt(m[3], 10) : 1);
+    }
+    return { c: c, v: v };
+  }
+  function monoEq(a, b) {
+    if (!same(a.c, b.c)) return false;
+    var keys = {};
+    Object.keys(a.v).concat(Object.keys(b.v)).forEach(function (k) { keys[k] = 1; });
+    return Object.keys(keys).every(function (k) { return (a.v[k] || 0) === (b.v[k] || 0); });
+  }
+  var TESTV = { x: 1.37, y: 2.11, a: 1.73, b: 0.83, m: 1.61, n: 0.77 };
+  function tv(k) { return TESTV[k] || 1.29; }
+  function sqOut(m) {             // (outside part)^2, with i^2 = -1
+    var r = m.c * m.c;
+    Object.keys(m.v).forEach(function (k) {
+      var e = m.v[k];
+      r *= k === "i" ? (e % 2 ? -1 : 1) : Math.pow(tv(k), 2 * e);
+    });
+    return r;
+  }
+  function inVal(m) {
+    if (m.v.i) return NaN;
+    var r = m.c;
+    Object.keys(m.v).forEach(function (k) { r *= Math.pow(tv(k), m.v[k]); });
+    return r;
+  }
+
+  // compare a student radical  (out)√(in) / den  with the target
+  function radCompare(v, t, pm) {
+    var so = mono(v.out, true), si = mono(v.in, true);
+    var sd = t.den ? num(v.den) : 1;
+    if (!so || !si || isNaN(sd)) return "unread";
+    var to = mono(t.out, true), ti = mono(t.in, true), td = t.den || 1;
+    if (pm) so = { c: Math.abs(so.c), v: so.v };
+    if (monoEq(so, to) && monoEq(si, ti) && same(sd, td)) return "ok";
+    var a = sqOut(so) * inVal(si) / (sd * sd), b = sqOut(to) * inVal(ti) / (td * td);
+    var signOk = pm || (Math.sign(so.c * sd) === Math.sign(to.c * td));
+    if (!isNaN(a) && Math.abs(a - b) < 1e-7 * Math.max(1, Math.abs(b)) && signOk) {
+      return si.c < 0 ? "almost-i" : "almost";
+    }
+    return "wrong";
+  }
+  var ALMOST = "That's equal to the right answer, but it isn't fully simplified yet. Is there still a perfect square inside the √? A √ left in the denominator? A fraction that reduces? Fix it and check again — no penalty.";
+  var ALMOST_I = "Close! There's still a negative inside the √. Pull out √−1 = i, then check again — no penalty.";
+  var UNREAD = "I couldn't read one of your boxes. Use numbers and letters like 4x^2y, 3i, or -2/3, then check again.";
+
+  function sameSet(arr, targets) {
+    var left = targets.slice();
+    return arr.length === targets.length && arr.every(function (a) {
+      for (var i = 0; i < left.length; i++) if (same(a, left[i])) { left.splice(i, 1); return true; }
+      return false;
+    });
+  }
+
+  // ---------- question templates ----------
+  // Each returns { form: html, check: function(values) -> result }
+  // result: { ok: true } | { ok: false, msg } | { retry: msg }  (retry = no penalty)
+  function need(v, keys) {
+    return keys.some(function (k) { return blank(v[k]); }) ? { retry: "Fill in every box first (leave the outside box blank only if it's a 1)." } : null;
+  }
+
+  var T = {
+    // simplified radical:  [out] √[in]   (optional ±, optional leading number, optional denominator)
+    rad: function (t) {
+      var form;
+      var r = radBox("");
+      if (t.den) {
+        form = '<div class="line"><span class="lbl">Answer:</span><span class="fbox">' + r +
+          '<span class="barline"></span>' + box("den", "denominator", 90) + "</span></div>";
+      } else if (t.lead !== undefined) {
+        form = '<div class="line math">x = ' + box("a", "number before plus or minus", 80) + " ± " + r + "</div>";
+      } else if (t.pm) {
+        form = '<div class="line math">x = ± ' + r + "</div>";
+      } else {
+        form = '<div class="line"><span class="lbl">Answer:</span>' + r + "</div>";
+      }
+      return {
+        form: form,
+        check: function (v) {
+          var req = ["in"].concat(t.den ? ["den"] : []).concat(t.lead !== undefined ? ["a"] : []);
+          var n = need(v, req); if (n) return n;
+          var res = radCompare(v, t, t.pm || t.lead !== undefined);
+          var aOk = t.lead === undefined || same(num(v.a), t.lead);
+          if (t.lead !== undefined && isNaN(num(v.a))) return { retry: UNREAD };
+          if (res === "unread") return { retry: UNREAD };
+          if (res === "ok" && aOk) return { ok: true };
+          if (aOk && res === "almost") return { retry: ALMOST };
+          if (aOk && res === "almost-i") return { retry: ALMOST_I };
+          return { ok: false };
+        }
+      };
+    },
+    // factoring:  [gcf]([p]x [q])([r]x [s]) = 0  ;  x = [s1] or [s2]
+    factor: function (t) {
+      var g = t.gcf ? box("g", "greatest common factor", 60) : "";
+      var p = t.lead ? box("p", "first x coefficient", 56) : "";
+      var r = t.lead ? box("r", "second x coefficient", 56) : "";
+      return {
+        form: '<div class="line math"><span class="lbl">Factor:</span> ' + g + "( " + p + "x " + box("q", "first number, with its sign", 70, "+ or −") +
+          " )( " + r + "x " + box("s", "second number, with its sign", 70, "+ or −") + " ) = 0</div>" +
+          '<div class="line math"><span class="lbl">Solve:</span> x = ' + box("s1", "first solution", 80) + " or x = " + box("s2", "second solution", 80) + "</div>",
+        check: function (v) {
+          var req = ["q", "s", "s1", "s2"].concat(t.gcf ? ["g"] : []);
+          var n = need(v, req); if (n) return { retry: "Fill in every box first (a blank x-coefficient means 1)." };
+          var G = t.gcf ? num(v.g) : 1;
+          var P = t.lead && !blank(v.p) ? num(v.p) : 1, Rr = t.lead && !blank(v.r) ? num(v.r) : 1;
+          var Q = num(v.q), S = num(v.s), a = num(v.s1), b = num(v.s2);
+          if ([G, P, Rr, Q, S, a, b].some(isNaN)) return { retry: UNREAD };
+          var fOk = same(G * P * Rr, t.A) && same(G * (P * S + Q * Rr), t.B) && same(G * Q * S, t.C);
+          var sOk = sameSet([a, b], t.sols);
+          if (fOk && sOk) return { ok: true };
+          if (fOk) return { ok: false, msg: "Your factoring is right, but your solutions are not. Set each factor equal to 0." };
+          if (sOk) return { ok: false, msg: "Your solutions are right, but your factors don't multiply back to the original." };
+          return { ok: false };
+        }
+      };
+    }
+  };
+
+  // ---------- random problem generators (each student gets a different set) ----------
+  var N = 12;
+  function freshState(attempt) {
+    var s = {
+      attempt: attempt || 1, started: new Date().toISOString(), finished: null, q: [],
+      seed: (Math.random() * 4294967296) >>> 0
+    };
+    for (var i = 0; i < N; i++) s.q.push({ st: "open", main: {}, sim: {} });
+    return s;
+  }
+  var state;
+  try { state = JSON.parse(localStorage.getItem(STORE_KEY) || "null"); } catch (e) { state = null; }
+  if (!state || !state.q || state.q.length !== N || state.seed == null) state = freshState(state && state.attempt);
+  function save() { try { localStorage.setItem(STORE_KEY, JSON.stringify(state)); } catch (e) {} }
+  save();
+  var SET_CODE = state.seed.toString(36).toUpperCase();
+
+  function mulberry(a) {
+    return function () {
+      a |= 0; a = a + 0x6D2B79F5 | 0;
+      var t = Math.imul(a ^ a >>> 15, 1 | a);
+      t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+      return ((t ^ t >>> 14) >>> 0) / 4294967296;
+    };
+  }
+  function pick(r, arr) { return arr[Math.floor(r() * arr.length)]; }
+  function int(r, lo, hi) { return lo + Math.floor(r() * (hi - lo + 1)); }
+  function nz(r, lo, hi) { var v; do { v = int(r, lo, hi); } while (v === 0); return v; }
+  function gcd(a, b) { a = Math.abs(a); b = Math.abs(b); while (b) { var t = a % b; a = b; b = t; } return a; }
+  var MI = "−";
+  function ns(n) { return n < 0 ? MI + (-n) : String(n); }            // shown number
+  function pn(n) { return n < 0 ? "(" + MI + (-n) + ")" : String(n); } // in parentheses if negative
+  function fs(num, den) {                                                // shown reduced fraction
+    var g = gcd(num, den); num /= g; den /= g;
+    if (den < 0) { num = -num; den = -den; }
+    return den === 1 ? ns(num) : ns(num) + "/" + den;
+  }
+  function vx(v, e) { return e === 0 ? "" : e === 1 ? v : v + sup(e); }   // shown power
+  function vt(v, e) { return e === 0 ? "" : e === 1 ? v : v + "^" + e; }  // typed power
+  function c1(k) { return k === 1 ? "" : String(k); }
+  function poly(A, B, C) {
+    var s = (A === 1 ? "" : A === -1 ? MI : A) + x2;
+    if (B) s += (B < 0 ? " − " : " + ") + (Math.abs(B) === 1 ? "" : Math.abs(B)) + "x";
+    if (C) s += (C < 0 ? " − " : " + ") + Math.abs(C);
+    return s + " = 0";
+  }
+  function bin(m, n) { return "(" + c1(m) + "x " + (n < 0 ? "− " : "+ ") + Math.abs(n) + ")"; }
+  var SQF = [2, 3, 5, 6, 7];
+
+  var G = {
+    radNum: function (r) {
+      var k = int(r, 2, 7), rr = pick(r, SQF), n = k * k * rr;
+      return {
+        prompt: "Simplify: " + R(n), t: "rad", d: { out: String(k), in: String(rr) },
+        steps: [
+          "Find the biggest perfect square that divides " + n + ": <b>" + (k * k) + " · " + rr + " = " + n + "</b>.",
+          "Split it up: " + R(n) + " = " + R(k * k) + " · " + R(rr) + ".",
+          R(k * k) + " = " + k + ", so the answer is <span class='ans'>" + k + R(rr) + "</span>."
+        ]
+      };
+    },
+    radVar: function (r) {
+      var V = pick(r, [["x", "y"], ["a", "b"], ["m", "n"]]);
+      var k = int(r, 2, 5), rr = pick(r, SQF), n = k * k * rr, e1 = int(r, 3, 7), e2 = int(r, 2, 6);
+      var o1 = Math.floor(e1 / 2), o2 = Math.floor(e2 / 2), i1 = e1 % 2, i2 = e2 % 2;
+      var outS = k + vx(V[0], o1) + vx(V[1], o2), inS = rr + vx(V[0], i1) + vx(V[1], i2);
+      function part(v, e) {
+        return e % 2 ? "<b>" + vx(v, e) + " = " + vx(v, e - 1) + " · " + v + "</b>" : "<b>" + vx(v, e) + "</b> is already a perfect square";
+      }
+      return {
+        prompt: "Simplify: " + R(n + vx(V[0], e1) + vx(V[1], e2)), t: "rad",
+        d: { out: k + vt(V[0], o1) + vt(V[1], o2), in: rr + vt(V[0], i1) + vt(V[1], i2) },
+        steps: [
+          "Break each piece into a perfect square times what's left: <b>" + n + " = " + (k * k) + " · " + rr + "</b>, " + part(V[0], e1) + ", " + part(V[1], e2) + ".",
+          "Shortcut for variables: divide the exponent by 2. The answer goes <b>outside</b>, the remainder stays <b>inside</b>. (" + e1 + " ÷ 2 = " + o1 + " R" + i1 + ", and " + e2 + " ÷ 2 = " + o2 + " R" + i2 + ".)",
+          R(k * k) + " = " + k + ",  " + R(vx(V[0], 2 * o1)) + " = " + vx(V[0], o1) + ",  " + R(vx(V[1], 2 * o2)) + " = " + vx(V[1], o2) + ".",
+          "The leftovers stay inside: <span class='ans'>" + outS + R(inS) + "</span>."
+        ]
+      };
+    },
+    radImag: function (r) {
+      var k = int(r, 2, 7), rr = pick(r, SQF), n = k * k * rr;
+      return {
+        prompt: "Simplify: " + R(MI + n), t: "rad", d: { out: k + "i", in: String(rr) },
+        steps: [
+          "Pull out the negative first: " + R(MI + n) + " = " + R(MI + "1") + " · " + R(n) + " = i" + R(n) + ".",
+          "Simplify " + R(n) + ": <b>" + n + " = " + (k * k) + " · " + rr + "</b>, so " + R(n) + " = " + k + R(rr) + ".",
+          "Put it together: <span class='ans'>" + k + "i" + R(rr) + "</span>."
+        ]
+      };
+    },
+    radImagVar: function (r) {
+      var k = int(r, 2, 6), rr = pick(r, SQF), n = k * k * rr, e = int(r, 2, 7), v = pick(r, ["x", "a", "m"]);
+      var o = Math.floor(e / 2), ii = e % 2;
+      return {
+        prompt: "Simplify: " + R(MI + n + vx(v, e)), t: "rad",
+        d: { out: k + vt(v, o) + "i", in: rr + vt(v, ii) },
+        steps: [
+          "Pull out the negative: " + R(MI + n + vx(v, e)) + " = i" + R(n + vx(v, e)) + ".",
+          "<b>" + n + " = " + (k * k) + " · " + rr + "</b>, and " + vx(v, e) + (ii ? " = " + vx(v, e - 1) + " · " + v : " is a perfect square") + ".",
+          R(k * k) + " = " + k + " and " + R(vx(v, 2 * o)) + " = " + vx(v, o) + " come outside.",
+          "Answer: <span class='ans'>" + k + vx(v, o) + "i" + R(rr + vx(v, ii)) + "</span>."
+        ]
+      };
+    },
+    rationalize: function (r) {
+      var k, rr, c, d0, g;
+      do {
+        k = pick(r, [1, 2, 3]); rr = pick(r, SQF); c = int(r, 2, 18);
+        d0 = k * rr; g = gcd(c, d0);
+      } while (d0 / g === 1 || (k === 1 && c % rr === 0));
+      var n = k * k * rr, out = c / g, den = d0 / g;
+      var steps = [];
+      if (k > 1) steps.push("Simplify the √ in the denominator first: " + R(n) + " = " + R(k * k) + " · " + R(rr) + " = " + k + R(rr) +
+        ", so you have " + F(c, k + R(rr)) + ".");
+      steps.push("Multiply the top and bottom by " + R(rr) + " (because " + R(rr) + " · " + R(rr) + " = " + rr + "): " +
+        F(c + R(rr), (k > 1 ? k + " · " : "") + rr) + " = " + F(c + R(rr), d0) + ".");
+      steps.push(g > 1 ? "Reduce: " + c + " and " + d0 + " both divide by " + g + ": <span class='ans'>" + F(c1(out) + R(rr), den) + "</span>."
+        : c + " and " + d0 + " don't reduce, so the answer is <span class='ans'>" + F(c1(out) + R(rr), den) + "</span>.");
+      return { prompt: "Simplify: " + F(c, R(n)), t: "rad", d: { out: String(out), in: String(rr), den: den }, steps: steps };
+    },
+    sqrtSimple: function (r) {
+      var a = int(r, 2, 9), m = pick(r, [2, 3, 5, 6, 7, 10, 11, 13, 14, 15]), C = a * m;
+      return {
+        prompt: a + x2 + " − " + C + " = 0", t: "rad", d: { out: "", in: String(m), pm: true },
+        steps: [
+          "Get x" + sup(2) + " by itself. Add " + C + ": " + a + "x" + sup(2) + " = " + C + ".",
+          "Divide by " + a + ": x" + sup(2) + " = " + m + ".",
+          "Take the square root of both sides — <b>don't forget ±</b>: <span class='ans'>x = ±" + R(m) + "</span>."
+        ]
+      };
+    },
+    sqrtShift: function (r) {
+      var h = nz(r, -6, 6), k = int(r, 2, 5), rr = pick(r, SQF), N2 = k * k * rr, plus = r() < 0.5;
+      var c = plus ? int(r, 1, 9) : int(r, 1, Math.min(9, N2 - 1));
+      var sq = "(x " + (h < 0 ? "− " : "+ ") + Math.abs(h) + ")" + sup(2);
+      var inner = "x " + (h < 0 ? "− " : "+ ") + Math.abs(h);
+      return {
+        prompt: sq + (plus ? " + " : " − ") + c + " = " + (plus ? N2 + c : N2 - c), t: "rad", d: { lead: -h, out: String(k), in: String(rr) },
+        steps: [
+          "Get the squared part by itself. " + (plus ? "Subtract " : "Add ") + c + ": " + sq + " = " + N2 + ".",
+          "Square root both sides with ±: " + inner + " = ±" + R(N2) + ".",
+          "Simplify: " + R(N2) + " = " + R(k * k) + " · " + R(rr) + " = " + k + R(rr) + ", so " + inner + " = ±" + k + R(rr) + ".",
+          (h < 0 ? "Add " : "Subtract ") + Math.abs(h) + ": <span class='ans'>x = " + ns(-h) + " ± " + k + R(rr) + "</span>."
+        ]
+      };
+    },
+    sqrtImag: function (r) {
+      var a = int(r, 2, 6), k = int(r, 1, 4), rr = pick(r, SQF), m = k * k * rr, C = a * m;
+      return {
+        prompt: a + x2 + " + " + C + " = 0", t: "rad", d: { out: c1(k) + "i", in: String(rr), pm: true },
+        steps: [
+          "Subtract " + C + ": " + a + "x" + sup(2) + " = " + MI + C + ".",
+          "Divide by " + a + ": x" + sup(2) + " = " + MI + m + ".",
+          "Square root with ±: x = ±" + R(MI + m) + " = ±i" + R(m) + (k > 1 ? " , and " + R(m) + " = " + R(k * k) + " · " + R(rr) + " = " + k + R(rr) : "") + ".",
+          "<span class='ans'>x = ±" + c1(k) + "i" + R(rr) + "</span>."
+        ]
+      };
+    },
+    factor1: function (r) {
+      var p, q;
+      do { p = nz(r, -9, 9); q = nz(r, -9, 9); } while (p === q || p + q === 0 || Math.abs(p * q) > 60);
+      var B = -(p + q), C = p * q;
+      return {
+        prompt: poly(1, B, C), t: "factor", d: { A: 1, B: B, C: C, sols: [p, q] },
+        steps: [
+          "Find two numbers that <b>multiply</b> to " + ns(C) + " and <b>add</b> to " + ns(B) + ": <b>" + ns(-p) + " and " + ns(-q) + "</b> (" +
+            ns(-p) + " · " + pn(-q) + " = " + ns(C) + ",  " + ns(-p) + " + " + pn(-q) + " = " + ns(B) + ").",
+          "Factor: " + bin(1, -p) + bin(1, -q) + " = 0.",
+          "Set each factor equal to 0: <span class='ans'>x = " + ns(p) + " or x = " + ns(q) + "</span>."
+        ]
+      };
+    },
+    factorLead: function (r) {
+      var m, n, q, B;
+      do { m = pick(r, [2, 3, 5]); n = nz(r, -9, 9); q = nz(r, -7, 7); B = m * q + n; } while (gcd(m, n) !== 1 || B === 0);
+      var C = n * q, AC = m * C;
+      return {
+        prompt: poly(m, B, C), t: "factor", d: { lead: true, A: m, B: B, C: C, sols: [-n / m, -q] },
+        steps: [
+          "Multiply a · c: " + m + " · " + pn(C) + " = " + ns(AC) + ". Find two numbers that multiply to " + ns(AC) + " and add to " + ns(B) +
+            ": <b>" + ns(m * q) + " and " + ns(n) + "</b>.",
+          "Split the middle term: " + m + "x" + sup(2) + (m * q < 0 ? " − " : " + ") + Math.abs(m * q) + "x" + (n < 0 ? " − " : " + ") + c1(Math.abs(n)) + "x" +
+            (C < 0 ? " − " : " + ") + Math.abs(C) + " = 0.",
+          "Group: " + m + "x" + bin(1, q) + (n < 0 ? " − " : " + ") + Math.abs(n) + bin(1, q) + " = 0  →  " + bin(m, n) + bin(1, q) + " = 0.",
+          "Set each factor equal to 0: <span class='ans'>x = " + fs(-n, m) + " or x = " + ns(-q) + "</span>."
+        ]
+      };
+    },
+    factorGCF: function (r) {
+      var g = int(r, 2, 5), p, q;
+      do { p = nz(r, -7, 7); q = nz(r, -7, 7); } while (p === q || p + q === 0);
+      var b = -(p + q), c = p * q;
+      return {
+        prompt: poly(g, g * b, g * c), t: "factor", d: { gcf: true, A: g, B: g * b, C: g * c, sols: [p, q] },
+        steps: [
+          "Every term divides by " + g + ". Take out the GCF: " + g + "(" + poly(1, b, c).replace(" = 0", "") + ") = 0.",
+          "Now factor the trinomial: multiply to " + ns(c) + " and add to " + ns(b) + ": <b>" + ns(-p) + " and " + ns(-q) + "</b>.",
+          g + bin(1, -p) + bin(1, -q) + " = 0. The " + g + " can't be 0, so set the other factors to 0.",
+          "<span class='ans'>x = " + ns(p) + " or x = " + ns(q) + "</span>."
+        ]
+      };
+    },
+    factorDOS: function (r) {
+      var g = int(r, 2, 6), k = int(r, 2, 9);
+      return {
+        prompt: poly(g, 0, -g * k * k), t: "factor", d: { gcf: true, A: g, B: 0, C: -g * k * k, sols: [k, -k] },
+        steps: [
+          "Both terms divide by " + g + ". Take out the GCF: " + g + "(x" + sup(2) + " − " + (k * k) + ") = 0.",
+          "x" + sup(2) + " − " + (k * k) + " is a <b>difference of squares</b>: a" + sup(2) + " − b" + sup(2) + " = (a − b)(a + b), so x" + sup(2) +
+            " − " + (k * k) + " = (x − " + k + ")(x + " + k + ").",
+          g + "(x − " + k + ")(x + " + k + ") = 0. The " + g + " can't be 0, so set the other factors to 0.",
+          "<span class='ans'>x = " + k + " or x = " + MI + k + "</span>."
+        ]
+      };
+    }
+  };
+
+  var RADTIP = "Leave the outside box blank if it's 1. Use ^ for exponents (x^2) and type i for the imaginary unit.";
+  var SLOTS = [
+    { g: "radNum", topic: "Simplifying radicals", title: "Simplify the radical" },
+    { g: "radVar", topic: "Simplifying radicals with variables", title: "Simplify the radical (all variables are positive)", tip: "Type exponents with ^ — for example x^2y means x²y." },
+    { g: "radImag", topic: "Imaginary numbers", title: "Simplify using i", tip: "Type i in the outside box, like 2i." },
+    { g: "radImagVar", topic: "Imaginary numbers with variables", title: "Simplify using i (variables are positive)", tip: "Example of typing: 3x^2i outside, 5x inside." },
+    { g: "rationalize", topic: "Rationalizing the denominator", title: "Simplify and rationalize the denominator", tip: "Leave the outside box blank if it's 1." },
+    { g: "sqrtSimple", topic: "Solving by square roots", title: "Solve by taking square roots", tip: "Leave the outside box blank if it's 1." },
+    { g: "sqrtShift", topic: "Solving by square roots", title: "Solve by taking square roots. Simplify completely." },
+    { g: "sqrtImag", topic: "Solving by square roots (imaginary solutions)", title: "Solve by taking square roots", tip: RADTIP },
+    { g: "factor1", topic: "Factoring (leading coefficient 1)", title: "Solve by factoring", tip: "Type each number with its sign, like +6 or -4." },
+    { g: "factorLead", topic: "Factoring (leading coefficient not 1)", title: "Solve by factoring", tip: "Leave an x-coefficient box blank if it's 1. Fractions like -2/3 are fine." },
+    { g: "factorGCF", topic: "Factoring (GCF first)", title: "Solve by factoring. Take out the GCF first.", tip: "Put the GCF in the first box, then factor what's left." },
+    { g: "factorDOS", topic: "Factoring (GCF & difference of squares)", title: "Solve by factoring. Take out the GCF first.", tip: "Put the GCF in the first box, then factor what's left." }
+  ];
+  var Q = SLOTS.map(function (s, i) {
+    var main = G[s.g](mulberry(state.seed + i * 7919));
+    var sim, tries = 0;
+    do { sim = G[s.g](mulberry((state.seed ^ 0x5bd1e995) + i * 104729 + tries * 31)); tries++; } while (sim.prompt === main.prompt && tries < 20);
+    return { topic: s.topic, title: s.title, tip: s.tip, main: main, sim: sim };
+  });
+
+  document.getElementById("setCode").textContent = "Problem set " + SET_CODE;
+
+  var nameEl = document.getElementById("stuName"), periodEl = document.getElementById("stuPeriod");
+  try {
+    nameEl.value = localStorage.getItem(STORE_KEY + "-name") || "";
+    periodEl.value = localStorage.getItem(STORE_KEY + "-period") || "";
+  } catch (e) {}
+  [nameEl, periodEl].forEach(function (el) {
+    el.addEventListener("input", function () {
+      try {
+        localStorage.setItem(STORE_KEY + "-name", nameEl.value);
+        localStorage.setItem(STORE_KEY + "-period", periodEl.value);
+      } catch (e) {}
+      document.getElementById("whoWarn").hidden = true;
+    });
+  });
+
+  // ---------- build the question cards ----------
+  var holder = document.getElementById("questions");
+  var cards = [];
+
+  function partHTML(p, tip) {
+    var tpl = T[p.t](p.d);
+    p.tpl = tpl;
+    return '<div class="system">' + p.prompt + "</div>" + tpl.form +
+      (tip ? '<p class="tip">' + tip + "</p>" : "") +
+      '<div class="buttons"><button class="check" type="button">Check my answer</button></div>' +
+      '<div class="feedback" aria-live="polite"></div>';
+  }
+  function stepsHTML(title, steps) {
+    return "<h3>" + title + "</h3><ol>" + steps.map(function (s) { return "<li>" + s + "</li>"; }).join("") + "</ol>";
+  }
+
+  Q.forEach(function (q, i) {
+    var sec = document.createElement("section");
+    sec.className = "card q";
+    sec.id = "q" + (i + 1);
+    sec.dataset.pad = "q" + (i + 1);
+    sec.dataset.padTitle = "Question " + (i + 1);
+    sec.innerHTML =
+      '<div class="qhead"><span class="qnum">' + (i + 1) + '</span><div class="grow"><h2>' + q.title + '</h2><p class="tag">' + q.topic +
+      '</p></div><span class="badge" hidden></span></div>' +
+      '<div class="part main">' + partHTML(q.main, q.tip) + "</div>" +
+      '<div class="solution main-sol" hidden>' + stepsHTML("Here's how to do it:", q.main.steps) + "</div>" +
+      '<div class="similar" hidden><h3>Now try a similar one (worth ½ point):</h3><div class="part sim">' + partHTML(q.sim, q.tip) + "</div></div>" +
+      '<div class="solution sim-sol" hidden>' + stepsHTML("Here's how to do this one:", q.sim.steps) +
+      '<p class="tip" style="margin-top:8px">Look back at both solutions — then keep going. Ask your teacher if you want more help with this type.</p></div>';
+    holder.appendChild(sec);
+
+    var c = { sec: sec, i: i, q: q, badge: sec.querySelector(".badge") };
+    c.main = wirePart(c, sec.querySelector(".part.main"), q.main, "main");
+    c.sim = wirePart(c, sec.querySelector(".part.sim"), q.sim, "sim");
+    cards.push(c);
+  });
+
+  function wirePart(c, el, p, which) {
+    var fields = Array.prototype.slice.call(el.querySelectorAll("[data-f]"));
+    var fb = el.querySelector(".feedback");
+    var btn = el.querySelector("button.check");
+    var saved = state.q[c.i][which] || {};
+    fields.forEach(function (f) {
+      if (saved[f.dataset.f] != null) f.value = saved[f.dataset.f];
+      f.addEventListener(f.tagName === "SELECT" ? "change" : "input", function () {
+        state.q[c.i][which][f.dataset.f] = f.value;
+        fields.forEach(function (g) { g.classList.remove("right", "wrong"); });
+        save();
+      });
+      if (f.tagName === "INPUT") f.addEventListener("keydown", function (e) { if (e.key === "Enter") { e.preventDefault(); btn.click(); } });
+    });
+    function values() { var v = {}; fields.forEach(function (f) { v[f.dataset.f] = f.value; }); return v; }
+    function lock() { fields.forEach(function (f) { f.disabled = true; }); btn.disabled = true; }
+    function mark(cls) { fields.forEach(function (f) { f.classList.remove("right", "wrong"); if (cls) f.classList.add(cls); }); }
+    btn.addEventListener("click", function () {
+      if (state.finished) return;
+      var res = p.tpl.check(values());
+      fb.className = "feedback";
+      if (res.retry) { fb.classList.add("almost"); fb.textContent = res.retry; return; }
+      var st = state.q[c.i];
+      if (res.ok) {
+        mark("right");
+        st.st = which === "main" ? "right" : "fixed";
+      } else {
+        mark("wrong");
+        st.st = which === "main" ? "retry" : "missed";
+        st[which + "Msg"] = res.msg || "";
+      }
+      save();
+      render(c, true);
+      updateProgress();
+    });
+    return { fields: fields, fb: fb, btn: btn, lock: lock, mark: mark };
+  }
+
+  var BADGES = {
+    right: ["right", "✓ 1 point"], fixed: ["fixed", "½ point"], missed: ["missed", "✗ 0 points"], retry: ["retry", "Try the similar one"]
+  };
+
+  function render(c, justChecked) {
+    var st = state.q[c.i].st, sec = c.sec;
+    var b = BADGES[st];
+    c.badge.hidden = !b;
+    if (b) { c.badge.className = "badge " + b[0]; c.badge.textContent = b[1]; }
+    var simShown = st === "retry" || st === "fixed" || st === "missed";
+    sec.querySelector(".main-sol").hidden = !simShown;
+    sec.querySelector(".similar").hidden = !simShown;
+    sec.querySelector(".sim-sol").hidden = st !== "missed";
+
+    if (st !== "open") { c.main.lock(); c.main.mark(st === "right" ? "right" : "wrong"); }
+    if (st === "fixed" || st === "missed") { c.sim.lock(); c.sim.mark(st === "fixed" ? "right" : "wrong"); }
+
+    var m = state.q[c.i];
+    if (st === "right") setFb(c.main.fb, "good", "✓ Correct! 1 point.");
+    else if (st !== "open") setFb(c.main.fb, "bad", "✗ Not quite. " + (m.mainMsg ? m.mainMsg + " " : "") + "Read the steps below, then try the similar problem.");
+    if (st === "fixed") setFb(c.sim.fb, "good", "✓ You got it! ½ point.");
+    else if (st === "missed") setFb(c.sim.fb, "bad", "✗ Not quite. " + (m.simMsg ? m.simMsg + " " : "") + "Here's how to do this one too.");
+
+    if (padApi) padApi.setProblem("q" + (c.i + 1), sec.querySelector(st === "retry" ? ".part.sim .system" : ".part.main .system").outerHTML);
+    if (justChecked && st === "retry") {
+      setTimeout(function () { sec.querySelector(".main-sol").scrollIntoView({ behavior: "smooth", block: "start" }); }, 50);
+    }
+  }
+  function setFb(el, cls, text) { el.className = "feedback " + cls; el.textContent = text; }
+
+  // ---------- scoring ----------
+  function points(st) { return st === "right" ? 1 : st === "fixed" ? 0.5 : 0; }
+  function isDone(st) { return st === "right" || st === "fixed" || st === "missed"; }
+  function tally() {
+    var first = 0, total = 0, done = 0;
+    state.q.forEach(function (q) { if (q.st === "right") first++; total += points(q.st); if (isDone(q.st)) done++; });
+    return { first: first, total: total, done: done };
+  }
+  function updateProgress() {
+    var t = tally();
+    document.getElementById("progressText").textContent =
+      t.done + " of " + N + " questions done · " + fmt(t.total) + (t.total === 1 ? " point" : " points") + " so far" + (t.done === N && !state.finished ? " — scroll down to submit!" : "");
+    document.getElementById("progressBar").style.width = (100 * t.done / N) + "%";
+  }
+  function fmt(n) { return n % 1 ? String(n).replace(".5", "½").replace(/^0½/, "½") : String(n); }
+  var CODE = { right: "✓", fixed: "½", missed: "✗", retry: "—", open: "—" };
+  var WORD = { right: "Right on first try (1)", fixed: "Right on similar problem (½)", missed: "Missed both (0)", retry: "Not finished (0)", open: "Not answered (0)" };
+
+  function hash(str) {
+    var h = 5381;
+    for (var i = 0; i < str.length; i++) h = ((h << 5) + h + str.charCodeAt(i)) | 0;
+    return (h >>> 0).toString(36);
+  }
+  function record() {
+    var t = tally();
+    var r = {
+      app: APP, name: nameEl.value.trim(), period: periodEl.value.trim(),
+      set: SET_CODE, attempt: state.attempt, started: state.started, finished: state.finished,
+      firstTry: t.first, points: t.total, outOf: N, percent: Math.round(1000 * t.total / N) / 10,
+      results: state.q.map(function (q, i) { return { q: i + 1, topic: Q[i].topic, result: CODE[q.st] }; })
+    };
+    r.check = hash(SALT + JSON.stringify(r));
+    return r;
+  }
+
+  function showResults() {
+    var r = record();
+    var rows = state.q.map(function (q, i) {
+      return "<tr><td>" + (i + 1) + "</td><td>" + Q[i].topic + "</td><td>" + WORD[q.st] + "</td></tr>";
+    }).join("");
+    document.getElementById("resultsBody").innerHTML =
+      '<p class="big">' + fmt(r.points) + " / " + N + "  (" + r.percent + "%)</p>" +
+      "<p><b>" + esc(r.name) + "</b>" + (r.period ? " · Period " + esc(r.period) : "") + " · finished " + new Date(r.finished).toLocaleString() + " · problem set " + r.set + "</p>" +
+      "<p>" + r.firstTry + " right on the first try, " +
+      state.q.filter(function (q) { return q.st === "fixed"; }).length + " fixed on the similar problem, " +
+      state.q.filter(function (q) { return !points(q.st); }).length + " missed.</p>" +
+      "<table><thead><tr><th>#</th><th>Topic</th><th>Result</th></tr></thead><tbody>" + rows + "</tbody></table>";
+    document.getElementById("submitBtn").hidden = true;
+    document.getElementById("downloadBtn").hidden = false;
+    cards.forEach(function (c) { c.main.lock(); c.sim.lock(); });
+    nameEl.disabled = periodEl.disabled = true;
+  }
+  function esc(s) { return String(s).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  function sendToSheet(r) {
+    var msg = document.getElementById("sentMsg");
+    if (!SHEET_URL) {
+      msg.hidden = false; msg.className = "sent";
+      msg.textContent = "Download your score file and turn it in the way your teacher asked (for example, attach it to the assignment).";
+      return;
+    }
+    msg.hidden = false; msg.className = "sent"; msg.textContent = "Sending your score to your teacher…";
+    fetch(SHEET_URL, { method: "POST", mode: "no-cors", headers: { "Content-Type": "text/plain;charset=utf-8" }, body: JSON.stringify(r) })
+      .then(function () {
+        msg.className = "sent ok";
+        msg.textContent = "✓ Your score was sent to your teacher. You can also download your score file as a backup.";
+        state.sent = true; save();
+      })
+      .catch(function () {
+        msg.className = "sent bad";
+        msg.textContent = "Your score didn't send (check your internet). Download your score file and turn it in instead.";
+      });
+  }
+
+  document.getElementById("submitBtn").addEventListener("click", function () {
+    if (!nameEl.value.trim()) {
+      document.getElementById("whoWarn").hidden = false;
+      nameEl.scrollIntoView({ behavior: "smooth", block: "center" });
+      nameEl.focus();
+      return;
+    }
+    var left = N - tally().done;
+    if (left && !confirm("You still have " + left + " question" + (left > 1 ? "s" : "") + " not finished. They'll count as 0. Submit anyway?")) return;
+    state.finished = new Date().toISOString();
+    save();
+    showResults();
+    updateProgress();
+    sendToSheet(record());
+  });
+
+  document.getElementById("downloadBtn").addEventListener("click", function () {
+    var r = record();
+    var rows = r.results.map(function (x) { return "<tr><td>" + x.q + "</td><td>" + x.topic + "</td><td>" + x.result + "</td></tr>"; }).join("");
+    var html = "<!doctype html><html><head><meta charset='utf-8'><title>Score - " + esc(r.name) + "</title>" +
+      "<style>body{font:16px system-ui,Arial,sans-serif;margin:24px;color:#1f2937}td,th{border-bottom:1px solid #ddd;padding:4px 8px;text-align:left}</style></head><body>" +
+      "<h1>Alg 2B Review: Radicals &amp; Quadratics</h1><p><b>" + esc(r.name) + "</b> · Period " + esc(r.period || "—") + "</p>" +
+      "<p style='font-size:1.6em'><b>" + r.points + " / " + r.outOf + " (" + r.percent + "%)</b> — " + r.firstTry + " right on first try</p>" +
+      "<p>Finished " + new Date(r.finished).toLocaleString() + " · attempt " + r.attempt + " · problem set " + esc(r.set) + "</p>" +
+      "<table><tr><th>#</th><th>Topic</th><th>Result (✓ = 1, ½ = similar problem, ✗ = 0)</th></tr>" + rows + "</table>" +
+      "<script type='application/json' id='score-data'>" + JSON.stringify(r).replace(/</g, "\\u003c") + "</scr" + "ipt></body></html>";
+    var blob = new Blob([html], { type: "text/html" });
+    var a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "Radicals-Quadratics-Score_" + (r.name || "student").replace(/[^a-z0-9]+/gi, "-") + ".html";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(function () { URL.revokeObjectURL(a.href); }, 2000);
+  });
+
+  document.getElementById("resetAll").addEventListener("click", function () {
+    if (!confirm("Start over with NEW problems? This clears all your answers, drawings, and your score on this device. Your teacher will see this as a new attempt.")) return;
+    try {
+      localStorage.setItem(STORE_KEY, JSON.stringify(freshState((state.attempt || 1) + 1)));
+      for (var i = 1; i <= N; i++) localStorage.removeItem(STORE_KEY + "-pad-q" + i);
+    } catch (e) {}
+    location.reload();
+  });
+
+  // ---------- split-screen scratch board (finger / stylus / mouse) ----------
+  var padApi = (function () {
+    var S = 2;
+    var COLORS = [["Black", "#1f2937"], ["Blue", "#2f5bd3"], ["Red", "#c62828"]];
+    var pad = document.querySelector(".pad");
+    var stage = pad.querySelector(".pad-stage");
+    var titleEl = pad.querySelector(".pad-title");
+    var probEl = pad.querySelector(".pad-problem");
+    var tools = pad.querySelector(".tools");
+    var color = COLORS[0][1], erasing = false;
+    var boards = {}, active = null;
+    var targets = Array.prototype.slice.call(document.querySelectorAll("[data-pad]"));
+
+    function makeBoard(id, sec) {
+      var key = STORE_KEY + "-pad-" + id;
+      var canvas = document.createElement("canvas");
+      canvas.width = 2; canvas.height = 2;
+      canvas.setAttribute("aria-label", "scratch board for " + sec.dataset.padTitle);
+      stage.appendChild(canvas);
+      var ctx = canvas.getContext("2d");
+      var sys = sec.querySelector(".system");
+      var bd = {
+        canvas: canvas, ctx: ctx, undo: [],
+        title: sec.dataset.padTitle,
+        problem: sys ? sys.outerHTML : "",
+        store: function () { try { localStorage.setItem(key, canvas.toDataURL("image/png")); } catch (e) {} },
+        pushUndo: function () { bd.undo.push(ctx.getImageData(0, 0, canvas.width, canvas.height)); if (bd.undo.length > 25) bd.undo.shift(); }
+      };
+      try {
+        var saved = localStorage.getItem(key);
+        if (saved) { var img = new Image(); img.onload = function () { grow(bd, img.width, img.height); ctx.drawImage(img, 0, 0); }; img.src = saved; }
+      } catch (e) {}
+
+      function pos(e) {
+        var r = canvas.getBoundingClientRect();
+        return { x: (e.clientX - r.left) * canvas.width / r.width, y: (e.clientY - r.top) * canvas.height / r.height };
+      }
+      var drawing = false, last = null, activeId = null;
+      canvas.addEventListener("pointerdown", function (e) {
+        if (drawing) return;               // ignore a second finger / resting palm
+        drawing = true; activeId = e.pointerId;
+        canvas.setPointerCapture(e.pointerId);
+        bd.pushUndo();
+        last = pos(e);
+        ctx.globalCompositeOperation = erasing ? "destination-out" : "source-over";
+        ctx.lineCap = "round"; ctx.lineJoin = "round";
+        ctx.strokeStyle = color;
+        ctx.lineWidth = erasing ? 50 : 6;
+        ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(last.x + 0.1, last.y + 0.1); ctx.stroke();
+        e.preventDefault();
+      });
+      canvas.addEventListener("pointermove", function (e) {
+        if (!drawing || e.pointerId !== activeId) return;
+        var evs = e.getCoalescedEvents ? e.getCoalescedEvents() : [e];
+        if (!evs.length) evs = [e];
+        evs.forEach(function (ev) {
+          var p = pos(ev);
+          ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+          last = p;
+        });
+        e.preventDefault();
+      });
+      function end(e) {
+        if (!drawing || e.pointerId !== activeId) return;
+        drawing = false; activeId = null;
+        ctx.globalCompositeOperation = "source-over";
+        bd.store();
+      }
+      canvas.addEventListener("pointerup", end);
+      canvas.addEventListener("pointercancel", end);
+      return bd;
+    }
+
+    targets.forEach(function (sec) { boards[sec.dataset.pad] = makeBoard(sec.dataset.pad, sec); });
+
+    var penButtons = [];
+    function makeBtn(html, onClick) {
+      var b = document.createElement("button");
+      b.type = "button"; b.innerHTML = html;
+      b.addEventListener("click", onClick);
+      tools.appendChild(b);
+      return b;
+    }
+    function selectTool(btn) { penButtons.forEach(function (b) { b.classList.remove("on"); }); btn.classList.add("on"); }
+    COLORS.forEach(function (c, i) {
+      var b = makeBtn('<span class="dot" style="background:' + c[1] + '"></span>' + c[0], function () { color = c[1]; erasing = false; selectTool(b); });
+      penButtons.push(b);
+      if (i === 0) b.classList.add("on");
+    });
+    var eraserBtn = makeBtn("Eraser", function () { erasing = true; selectTool(eraserBtn); });
+    penButtons.push(eraserBtn);
+    var sp = document.createElement("span"); sp.className = "spacer"; tools.appendChild(sp);
+    makeBtn("↶ Undo", function () {
+      var bd = boards[active];
+      if (!bd || !bd.undo.length) return;
+      bd.ctx.putImageData(bd.undo.pop(), 0, 0);
+      bd.store();
+    });
+    makeBtn("Clear", function () {
+      var bd = boards[active];
+      if (!bd) return;
+      bd.pushUndo();
+      bd.ctx.clearRect(0, 0, bd.canvas.width, bd.canvas.height);
+      bd.store();
+    });
+
+    function grow(bd, w, h) {   // bigger only, so nothing drawn is lost
+      var c = bd.canvas;
+      w = Math.max(c.width, Math.ceil(w)); h = Math.max(c.height, Math.ceil(h));
+      if (w === c.width && h === c.height) return;
+      var keep = null;
+      if (c.width > 2) { keep = document.createElement("canvas"); keep.width = c.width; keep.height = c.height; keep.getContext("2d").drawImage(c, 0, 0); }
+      c.width = w; c.height = h;
+      if (keep) bd.ctx.drawImage(keep, 0, 0);
+      c.style.width = (w / S) + "px";
+      c.style.height = (h / S) + "px";
+    }
+    function fit() {
+      var bd = boards[active];
+      if (!bd) return;
+      var r = stage.getBoundingClientRect();
+      if (!r.width || !r.height) return;
+      grow(bd, r.width * S, r.height * S);
+    }
+    function paintHead() {
+      var bd = boards[active];
+      titleEl.innerHTML = "Scratch board · " + bd.title + " <small>(not graded)</small>";
+      probEl.innerHTML = bd.problem;
+    }
+    function show(id) {
+      if (id === active || !boards[id]) return;
+      if (active) boards[active].canvas.classList.remove("active");
+      active = id;
+      boards[id].canvas.classList.add("active");
+      paintHead();
+      fit();
+    }
+    function pick() {
+      var line = window.innerHeight * 0.4;
+      var cur = targets[0];
+      targets.forEach(function (t) { if (t.getBoundingClientRect().top <= line) cur = t; });
+      show(cur.dataset.pad);
+    }
+    var ticking = false;
+    window.addEventListener("scroll", function () {
+      if (ticking || document.body.classList.contains("pad-full")) return;
+      ticking = true;
+      requestAnimationFrame(function () { ticking = false; pick(); });
+    }, { passive: true });
+    targets.forEach(function (t) { t.addEventListener("focusin", function () { show(t.dataset.pad); }); });
+    window.addEventListener("resize", fit);
+    if (window.ResizeObserver) new ResizeObserver(fit).observe(stage);
+
+    document.querySelector(".pad-open").addEventListener("click", function () {
+      pick();
+      document.body.classList.add("pad-full");
+      fit();
+    });
+    pad.querySelector(".pad-close").addEventListener("click", function () { document.body.classList.remove("pad-full"); });
+
+    pick();
+    return {
+      setProblem: function (id, html) {
+        if (!boards[id]) return;
+        boards[id].problem = html;
+        if (id === active) paintHead();
+      }
+    };
+  })();
+
+  // ---------- restore ----------
+  cards.forEach(function (c) { render(c, false); });
+  updateProgress();
+  if (state.finished) {
+    showResults();
+    var msg = document.getElementById("sentMsg");
+    msg.hidden = false; msg.className = "sent" + (state.sent ? " ok" : "");
+    msg.textContent = state.sent ? "✓ Your score was already sent to your teacher." : "You already submitted. Download your score file if you haven't turned it in.";
+  }
+})();
+</script>
+</body>
+</html>
